@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-28T18:47:42.939Z",
+  "generatedAt": "2026-09-28T18:52:05.545Z",
   "assistant": {
     "name": "Akira",
     "email": "akira@artistsonly.io",
@@ -12,7 +12,7 @@
   },
   "now": {
     "lastCycle": {
-      "ts": "2026-09-28T18:47:42.938Z",
+      "ts": "2026-09-28T18:52:05.544Z",
       "cycle": "dashboard",
       "action": "ok",
       "detail": "2 ms"
@@ -201,10 +201,34 @@
   ],
   "activity": [
     {
-      "ts": "2026-09-28T18:47:42.938Z",
+      "ts": "2026-09-28T18:52:05.544Z",
       "cycle": "dashboard",
       "action": "ok",
       "detail": "2 ms"
+    },
+    {
+      "ts": "2026-09-28T18:42:35.267Z",
+      "cycle": "heartbeat",
+      "action": "ok",
+      "detail": "3 ms"
+    },
+    {
+      "ts": "2026-09-28T18:42:35.267Z",
+      "cycle": "reminders",
+      "action": "checked",
+      "detail": "0 fired, 0 open"
+    },
+    {
+      "ts": "2026-09-28T18:42:35.266Z",
+      "cycle": "process-inbox",
+      "action": "idle",
+      "detail": "inbox empty"
+    },
+    {
+      "ts": "2026-09-28T18:42:35.265Z",
+      "cycle": "calendar-sync",
+      "action": "synced",
+      "detail": "0 imported from 0 feed(s), 0 Akira-owned"
     },
     {
       "ts": "2026-09-28T11:08:41.149Z",
