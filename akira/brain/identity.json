@@ -1,0 +1,42 @@
+{
+  "assistant": {
+    "name": "Akira",
+    "email": "akira@artistsonly.io",
+    "site": "https://artistsonly.io",
+    "dashboard": "https://artistsonly.io/akira",
+    "version": "1.0.0",
+    "born": "2026-09-28"
+  },
+  "owner": {
+    "name": "Amos",
+    "fullName": "Amos",
+    "aliases": [],
+    "emails": [],
+    "timezone": "America/Toronto",
+    "locale": "en-CA",
+    "quietHours": { "start": "23:00", "end": "07:00" }
+  },
+  "monitoring": {
+    "webSearchQueries": [
+      "\"Amos\" artistsonly",
+      "artistsonly.io"
+    ],
+    "watchDomains": [],
+    "blockedDomains": []
+  },
+  "devices": {
+    "expected": [
+      { "id": "iphone", "label": "iPhone", "kind": "phone" },
+      { "id": "apple-watch", "label": "Apple Watch", "kind": "watch" },
+      { "id": "mac-main", "label": "Main Mac", "kind": "computer" }
+    ],
+    "staleAfterMinutes": 30
+  },
+  "calendars": {
+    "subscribedIcsUrls": []
+  },
+  "notify": {
+    "ntfyTopic": "",
+    "emailTo": ""
+  }
+}

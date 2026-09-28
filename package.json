@@ -1,0 +1,12 @@
+{
+  "name": "artistsonly",
+  "private": true,
+  "workspaces": ["akira", "site"],
+  "scripts": {
+    "akira": "npm --prefix akira run akira --",
+    "dev": "AKIRA_LOCAL_BRAIN=1 npm --prefix site run dev",
+    "test": "npm --prefix akira test",
+    "typecheck": "npm --prefix akira run typecheck && npm --prefix site run typecheck",
+    "build": "npm --prefix site run build"
+  }
+}

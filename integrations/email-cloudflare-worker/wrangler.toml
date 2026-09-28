@@ -1,0 +1,7 @@
+name = "akira-mail"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+[vars]
+AKIRA_URL = "https://artistsonly.io"
+# FORWARD_TO = "amos@example.com"
+# secrets: wrangler secret put AKIRA_INGEST_SECRET

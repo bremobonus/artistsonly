@@ -1,0 +1,7 @@
+{
+  "hooks": {
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "bash ~/.config/akira/akira-hook.sh", "timeout": 20 } ] }
+    ]
+  }
+}

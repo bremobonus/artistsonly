@@ -1,0 +1,98 @@
+{
+  "generatedAt": "2026-09-28T11:08:41.150Z",
+  "assistant": {
+    "name": "Akira",
+    "email": "akira@artistsonly.io",
+    "version": "1.0.0",
+    "status": "online"
+  },
+  "owner": {
+    "name": "Amos",
+    "timezone": "America/Toronto"
+  },
+  "now": {
+    "lastCycle": {
+      "ts": "2026-09-28T11:08:41.149Z",
+      "cycle": "dashboard",
+      "action": "ok",
+      "detail": "2 ms"
+    },
+    "nextCycles": [
+      {
+        "name": "heartbeat (inbox, calendar, reminders)",
+        "every": "15 min"
+      },
+      {
+        "name": "web-monitor",
+        "every": "hourly"
+      },
+      {
+        "name": "daily-brief",
+        "every": "07:00 local"
+      },
+      {
+        "name": "health-review",
+        "every": "Sunday"
+      },
+      {
+        "name": "compact-memory",
+        "every": "Sunday"
+      }
+    ],
+    "working": []
+  },
+  "counts": {
+    "journalEntries": 1,
+    "documents": 0,
+    "calendarUpcoming": 0,
+    "remindersOpen": 0,
+    "mentions": 0,
+    "drafts": 0,
+    "questions": 0
+  },
+  "calendar": [],
+  "reminders": [],
+  "priorities": {
+    "date": "",
+    "items": [],
+    "notes": "",
+    "updatedAt": ""
+  },
+  "health": {
+    "latest": {},
+    "daily": [],
+    "flags": [],
+    "updatedAt": ""
+  },
+  "devices": {
+    "devices": {},
+    "updatedAt": ""
+  },
+  "mentions": {
+    "items": [],
+    "updatedAt": ""
+  },
+  "drafts": [],
+  "questions": [],
+  "journalRecent": [
+    {
+      "id": "j_2026-09-28_0001",
+      "ts": "2026-09-28T00:00:00-04:00",
+      "kind": "system",
+      "source": "bootstrap",
+      "summary": "Akira created. Brain initialised in repo bremobonus/artistsonly under akira/brain. Retention rule: append-only, never forget.",
+      "tags": [
+        "bootstrap"
+      ]
+    }
+  ],
+  "activity": [
+    {
+      "ts": "2026-09-28T11:08:41.149Z",
+      "cycle": "dashboard",
+      "action": "ok",
+      "detail": "2 ms"
+    }
+  ],
+  "memoryExcerpt": "# Akira — Long-term memory\n\n_Curated by Akira. Every fact here is also in the journal with a source. Last compaction: never._\n\n## Amos\n- Owner of artistsonly.io. Timezone America/Toronto (update in `identity.json` if wrong).\n- Wants: everything tracked, nothing forgotten, records kept for legal defence.\n\n## Standing instructions\n- Draft, do not send, unless pre-approved.\n- Daily brief at 07:00 local.\n- Watch the web for mentions of Amos and artistsonly.io.\n\n## People\n_(see `people/`)_\n\n## Projects\n_(see `projects/`)_\n\n## Open loops\n- [ ] Amos to fill in `identity.json`: full name, aliases, emails, search queries, calendar ICS URLs, ntfy topic.\n- [ ] Amos to install the Mac agent and the iPhone Health export automation.\n"
+}
