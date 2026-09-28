@@ -48,3 +48,24 @@ test("dashboard builds from empty state", () => {
   assert.equal(d.assistant.name, "Akira");
   assert.ok(d.counts.journalEntries >= 1);
 });
+
+test("parseGmailMessage extracts headers, text body and attachments", async () => {
+  const { parseGmailMessage } = await import("../src/integrations/google.js");
+  const b64 = (s: string) => Buffer.from(s).toString("base64").replace(/\+/g, "-").replace(/\//g, "_");
+  const m = parseGmailMessage({
+    id: "m1", threadId: "t1", internalDate: "1790600000000",
+    payload: {
+      mimeType: "multipart/mixed",
+      headers: [{ name: "From", value: "Jane <jane@example.com>" }, { name: "Subject", value: "Invoice" }, { name: "To", value: "amos@example.com" }],
+      parts: [
+        { mimeType: "text/plain", body: { data: b64("Please pay by Oct 15.") } },
+        { mimeType: "application/pdf", filename: "invoice.pdf", body: { attachmentId: "att1", size: 1234 } },
+      ],
+    },
+  });
+  assert.equal(m.from, "Jane <jane@example.com>");
+  assert.equal(m.subject, "Invoice");
+  assert.equal(m.text, "Please pay by Oct 15.");
+  assert.equal(m.attachments[0].filename, "invoice.pdf");
+  assert.equal(m.ts, "2026-09-28T12:53:20.000Z");
+});

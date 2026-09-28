@@ -5,30 +5,61 @@
     "site": "https://artistsonly.io",
     "dashboard": "https://artistsonly.io/akira",
     "version": "1.0.0",
-    "born": "2026-09-28"
+    "born": "2026-09-28",
+    "fullName": "Akira Nakita",
+    "emails": [
+      "akira@artistsonly.io",
+      "akira@thedream.io"
+    ]
   },
   "owner": {
     "name": "Amos",
-    "fullName": "Amos",
-    "aliases": [],
+    "fullName": "Amos LeBlanc",
+    "aliases": [
+      "Amos Le Blanc"
+    ],
     "emails": [],
     "timezone": "America/Toronto",
     "locale": "en-CA",
-    "quietHours": { "start": "23:00", "end": "07:00" }
+    "quietHours": {
+      "start": "23:00",
+      "end": "07:00"
+    },
+    "company": "Dream Inc (thedream.io)",
+    "role": "Director (music videos); AI director, AI production company"
   },
   "monitoring": {
     "webSearchQueries": [
-      "\"Amos\" artistsonly",
-      "artistsonly.io"
+      "\"Amos LeBlanc\"",
+      "\"Amos Le Blanc\"",
+      "\"Amos LeBlanc\" director",
+      "\"Amos LeBlanc\" music video",
+      "\"Amos LeBlanc\" \"Mi amour\"",
+      "\"Dream Inc\" Amos LeBlanc",
+      "\"Amos LeBlanc\" AI director",
+      "artistsonly.io",
+      "thedream.io"
     ],
     "watchDomains": [],
     "blockedDomains": []
   },
   "devices": {
     "expected": [
-      { "id": "iphone", "label": "iPhone", "kind": "phone" },
-      { "id": "apple-watch", "label": "Apple Watch", "kind": "watch" },
-      { "id": "mac-main", "label": "Main Mac", "kind": "computer" }
+      {
+        "id": "iphone",
+        "label": "iPhone",
+        "kind": "phone"
+      },
+      {
+        "id": "apple-watch",
+        "label": "Apple Watch",
+        "kind": "watch"
+      },
+      {
+        "id": "mac-main",
+        "label": "Main Mac",
+        "kind": "computer"
+      }
     ],
     "staleAfterMinutes": 30
   },

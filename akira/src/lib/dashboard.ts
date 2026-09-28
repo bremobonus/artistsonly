@@ -4,7 +4,7 @@ import { identity, journalCount, journalRecent, manifestCount, memory, nowIso, s
 import type { Dashboard } from "./types.js";
 
 export const SCHEDULE = [
-  { name: "heartbeat (inbox, calendar, reminders)", every: "15 min" },
+  { name: "heartbeat (Gmail, calendar, inbox, reminders)", every: "15 min" },
   { name: "web-monitor", every: "hourly" },
   { name: "daily-brief", every: "07:00 local" },
   { name: "health-review", every: "Sunday" },

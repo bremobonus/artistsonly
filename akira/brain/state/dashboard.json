@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-28T11:08:41.150Z",
+  "generatedAt": "2026-09-28T18:47:42.939Z",
   "assistant": {
     "name": "Akira",
     "email": "akira@artistsonly.io",
@@ -12,14 +12,14 @@
   },
   "now": {
     "lastCycle": {
-      "ts": "2026-09-28T11:08:41.149Z",
+      "ts": "2026-09-28T18:47:42.938Z",
       "cycle": "dashboard",
       "action": "ok",
       "detail": "2 ms"
     },
     "nextCycles": [
       {
-        "name": "heartbeat (inbox, calendar, reminders)",
+        "name": "heartbeat (Gmail, calendar, inbox, reminders)",
         "every": "15 min"
       },
       {
@@ -42,7 +42,7 @@
     "working": []
   },
   "counts": {
-    "journalEntries": 1,
+    "journalEntries": 7,
     "documents": 0,
     "calendarUpcoming": 0,
     "remindersOpen": 0,
@@ -76,6 +76,119 @@
   "questions": [],
   "journalRecent": [
     {
+      "id": "j_2026-09-28_0007",
+      "ts": "2026-09-28T18:56:00-04:00",
+      "kind": "fact",
+      "source": "j_2026-09-28_0005",
+      "summary": "Owner identity inferred from Amos's search terms: Amos LeBlanc (also 'Amos Le Blanc'), director of music videos, AI director / AI production company, Dream Inc (thedream.io), work titled 'Mi amour'. Akira's full name per Amos: Akira Nakita; second address akira@thedream.io.",
+      "tags": [
+        "amos",
+        "identity"
+      ]
+    },
+    {
+      "id": "j_2026-09-28_0006",
+      "ts": "2026-09-28T18:50:00-04:00",
+      "kind": "decision",
+      "source": "claude-session",
+      "summary": "Merged PR #1 into main (merge commit 58d15b6) on Amos's instruction. Root cause of the failed scheduled run: cron ran from the default branch and checked out an empty main; merge resolves it.",
+      "tags": [
+        "git",
+        "decision"
+      ]
+    },
+    {
+      "id": "j_2026-09-28_0005",
+      "ts": "2026-09-28T13:40:34-04:00",
+      "kind": "event",
+      "source": "artifact:BugW9vbiJAfAMejjjAS1uA",
+      "summary": "Amos answered the Build Log page: merge now; powers = send email, Google Calendar write, Gmail read, 'absolutely everything'; identity fields filled with Akira's name (Akira Nakita) and emails; search queries about Amos LeBlanc, director, music videos, Mi amour, Dream Inc, AI director; ICS: 'go get this yourself'; all 7 setup items ticked as done.",
+      "tags": [
+        "amos",
+        "decision",
+        "page"
+      ],
+      "data": {
+        "at": "2026-09-28T13:40:33.884Z",
+        "merge": "merge now",
+        "powers": [
+          "send email as akira@artistsonly.io",
+          "Google Calendar write",
+          "Gmail read",
+          "other"
+        ],
+        "powersOther": [
+          "absolutely everything i need you are a super assistant all powerful"
+        ],
+        "identity": {
+          "fullName": "Akira Nakita",
+          "aliases": [
+            "Akira"
+          ],
+          "emails": [
+            "akira@artistsonly.io",
+            "akira@thedream.io"
+          ],
+          "searchQueries": [
+            "amos",
+            "amos le blanc",
+            "director music video each city,",
+            "amos leblanc",
+            "Mi amour",
+            "dream inc,",
+            "ai director ai production company"
+          ],
+          "icsUrls": [
+            "go get this yourself"
+          ],
+          "timezone": "America/Toronto"
+        },
+        "message": "make yourself all powerful anticipate my needs and improve my life and career",
+        "checklistTicked": [
+          "merge",
+          "vercel",
+          "secrets",
+          "identity",
+          "mac",
+          "phone",
+          "email"
+        ]
+      }
+    },
+    {
+      "id": "j_2026-09-28_0004",
+      "ts": "2026-09-28T13:45:00-04:00",
+      "kind": "fact",
+      "source": "amos",
+      "summary": "Amos prefers a light, Apple-style, sleek minimalist visual theme for his pages and the /akira operations room. Applied to the Build Log page and site/app/globals.css.",
+      "tags": [
+        "preference",
+        "design"
+      ]
+    },
+    {
+      "id": "j_2026-09-28_0003",
+      "ts": "2026-09-28T12:35:00-04:00",
+      "kind": "decision",
+      "source": "amos",
+      "summary": "Amos ruled: always show work as an interactive HTML5 page he can respond to. Recorded in CLAUDE.md; first page published at https://claude.ai/artifact/BugW9vbiJAfAMejjjAS1uA",
+      "tags": [
+        "rule",
+        "reporting"
+      ]
+    },
+    {
+      "id": "j_2026-09-28_0002",
+      "ts": "2026-09-28T11:40:00-04:00",
+      "kind": "decision",
+      "source": "amos",
+      "summary": "Amos instructed: Akira automates and decides everything without asking him. Applied within her current powers; ask_amos replaced by log_decision. Password/browser/arbitrary-API control was blocked by the build-time safety policy and is recorded in rules/autonomy.md.",
+      "tags": [
+        "rule",
+        "autonomy"
+      ]
+    },
+    {
       "id": "j_2026-09-28_0001",
       "ts": "2026-09-28T00:00:00-04:00",
       "kind": "system",
@@ -88,11 +201,17 @@
   ],
   "activity": [
     {
+      "ts": "2026-09-28T18:47:42.938Z",
+      "cycle": "dashboard",
+      "action": "ok",
+      "detail": "2 ms"
+    },
+    {
       "ts": "2026-09-28T11:08:41.149Z",
       "cycle": "dashboard",
       "action": "ok",
       "detail": "2 ms"
     }
   ],
-  "memoryExcerpt": "# Akira — Long-term memory\n\n_Curated by Akira. Every fact here is also in the journal with a source. Last compaction: never._\n\n## Amos\n- Owner of artistsonly.io. Timezone America/Toronto (update in `identity.json` if wrong).\n- Wants: everything tracked, nothing forgotten, records kept for legal defence.\n\n## Standing instructions\n- Draft, do not send, unless pre-approved.\n- Daily brief at 07:00 local.\n- Watch the web for mentions of Amos and artistsonly.io.\n\n## People\n_(see `people/`)_\n\n## Projects\n_(see `projects/`)_\n\n## Open loops\n- [ ] Amos to fill in `identity.json`: full name, aliases, emails, search queries, calendar ICS URLs, ntfy topic.\n- [ ] Amos to install the Mac agent and the iPhone Health export automation.\n"
+  "memoryExcerpt": "# Akira — Long-term memory\n\n_Curated by Akira. Every fact here is also in the journal with a source. Last compaction: never._\n\n## Amos\n- Amos LeBlanc (also written Amos Le Blanc). Director of music videos; AI director / AI production company; Dream Inc (thedream.io). _(src: j_2026-09-28_0007)_\n- Owner of artistsonly.io. Timezone America/Toronto, confirmed 2026-09-28. _(src: j_2026-09-28_0005)_\n- Work or project titled \"Mi amour\" (context unknown yet). _(src: j_2026-09-28_0005)_\n- Wants Akira anticipating his needs and improving his life and career. _(src: j_2026-09-28_0005)_\n- Wants: everything tracked, nothing forgotten, records kept for legal defence.\n\n## Preferences\n- Visual style: light, Apple-like, sleek and minimalist (system font, #f5f5f7 ground, white cards, blue accent). _(src: j_2026-09-28_0004)_\n\n## Akira\n- Full name Akira Nakita. Addresses akira@artistsonly.io and akira@thedream.io. _(src: j_2026-09-28_0005)_\n\n## Standing instructions\n- Draft, do not send, unless pre-approved.\n- Daily brief at 07:00 local.\n- Watch the web for mentions of Amos and artistsonly.io.\n- 2026-09-28: Amos ruled that all work is shown to him as an interactive HTML page he can respond on. _(src: CLAUDE.md)_\n- 2026-09-28: Amos ruled that Akira must never ask him; decide, act within her powers, log the decision. _(src: rules/autonomy.md)_\n\n## People\n_(see `people/`)_\n\n## Projects\n_(see `projects/`)_\n\n## Open loops\n- [x] identity.json filled from Amos's page answers 2026-09-28 (his own email addresses still unknown; ntfy topic unknown).\n- [x] Amos ticked Mac agent, phone, email routing, Vercel, secrets as done on 2026-09-28 (unverified until data arrives).\n"
 }

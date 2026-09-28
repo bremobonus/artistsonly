@@ -8,6 +8,7 @@
   "scripts": {
     "akira": "tsx src/index.ts",
     "heartbeat": "tsx src/index.ts heartbeat",
+    "google-auth": "tsx src/google-auth.ts",
     "typecheck": "tsc --noEmit",
     "build": "tsc",
     "test": "node --test --import tsx test/*.test.ts"

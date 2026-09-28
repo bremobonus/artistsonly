@@ -8,10 +8,12 @@ import { webMonitor } from "./cycles/web-monitor.js";
 import { dailyBrief } from "./cycles/daily-brief.js";
 import { healthReview } from "./cycles/health.js";
 import { compactMemory } from "./cycles/compact-memory.js";
+import { gmailSync } from "./cycles/gmail-sync.js";
 
 const cycles: Record<string, () => Promise<void>> = {
   "calendar-sync": calendarSync,
   reminders: remindersDue,
+  "gmail-sync": gmailSync,
   "process-inbox": processInbox,
   "web-monitor": webMonitor,
   "daily-brief": dailyBrief,
@@ -22,6 +24,7 @@ const cycles: Record<string, () => Promise<void>> = {
   },
   heartbeat: async () => {
     await calendarSync();
+    await gmailSync();
     await processInbox();
     await remindersDue();
   },

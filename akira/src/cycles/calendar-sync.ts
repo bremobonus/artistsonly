@@ -1,5 +1,6 @@
 import { activity, identity, newId, nowIso, state } from "../lib/brain.js";
 import type { CalendarEvent } from "../lib/types.js";
+import { calendarEvents, googleConfigured } from "../integrations/google.js";
 
 /** Minimal ICS parser: VEVENT with SUMMARY/DTSTART/DTEND/LOCATION/DESCRIPTION/UID. */
 export function parseIcs(ics: string, source: string): CalendarEvent[] {
@@ -38,8 +39,20 @@ export function parseIcs(ics: string, source: string): CalendarEvent[] {
 export async function calendarSync(): Promise<void> {
   const urls = identity().calendars?.subscribedIcsUrls ?? [];
   const cal = state.calendar();
-  const akiraOwned = cal.events.filter((e) => !e.id.startsWith("ics_"));
+  const akiraOwned = cal.events.filter((e) => !e.id.startsWith("ics_") && !e.id.startsWith("gcal_"));
+  const ownedGoogleIds = new Set(akiraOwned.map((e) => e.googleId).filter(Boolean));
   let imported: CalendarEvent[] = [];
+  if (googleConfigured()) {
+    try {
+      const lo = new Date(Date.now() - 30 * 86400_000).toISOString();
+      const hi = new Date(Date.now() + 365 * 86400_000).toISOString();
+      const g = (await calendarEvents(lo, hi)).filter((e) => !ownedGoogleIds.has(e.googleId));
+      imported = imported.concat(g);
+      activity("calendar-sync", "google", `${g.length} event(s) from Google Calendar`);
+    } catch (e) {
+      activity("calendar-sync", "google-failed", (e as Error).message.slice(0, 200));
+    }
+  }
   for (const url of urls) {
     try {
       const res = await fetch(url);
