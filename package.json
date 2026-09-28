@@ -1,7 +1,6 @@
 {
   "name": "artistsonly",
   "private": true,
-  "workspaces": ["akira", "site"],
   "scripts": {
     "akira": "npm --prefix akira run akira --",
     "dev": "AKIRA_LOCAL_BRAIN=1 npm --prefix site run dev",
