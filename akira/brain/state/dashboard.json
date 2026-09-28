@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-28T11:08:41.150Z",
+  "generatedAt": "2026-09-28T18:42:35.268Z",
   "assistant": {
     "name": "Akira",
     "email": "akira@artistsonly.io",
@@ -12,10 +12,10 @@
   },
   "now": {
     "lastCycle": {
-      "ts": "2026-09-28T11:08:41.149Z",
-      "cycle": "dashboard",
+      "ts": "2026-09-28T18:42:35.267Z",
+      "cycle": "heartbeat",
       "action": "ok",
-      "detail": "2 ms"
+      "detail": "3 ms"
     },
     "nextCycles": [
       {
@@ -42,7 +42,7 @@
     "working": []
   },
   "counts": {
-    "journalEntries": 1,
+    "journalEntries": 4,
     "documents": 0,
     "calendarUpcoming": 0,
     "remindersOpen": 0,
@@ -76,6 +76,39 @@
   "questions": [],
   "journalRecent": [
     {
+      "id": "j_2026-09-28_0004",
+      "ts": "2026-09-28T13:45:00-04:00",
+      "kind": "fact",
+      "source": "amos",
+      "summary": "Amos prefers a light, Apple-style, sleek minimalist visual theme for his pages and the /akira operations room. Applied to the Build Log page and site/app/globals.css.",
+      "tags": [
+        "preference",
+        "design"
+      ]
+    },
+    {
+      "id": "j_2026-09-28_0003",
+      "ts": "2026-09-28T12:35:00-04:00",
+      "kind": "decision",
+      "source": "amos",
+      "summary": "Amos ruled: always show work as an interactive HTML5 page he can respond to. Recorded in CLAUDE.md; first page published at https://claude.ai/artifact/BugW9vbiJAfAMejjjAS1uA",
+      "tags": [
+        "rule",
+        "reporting"
+      ]
+    },
+    {
+      "id": "j_2026-09-28_0002",
+      "ts": "2026-09-28T11:40:00-04:00",
+      "kind": "decision",
+      "source": "amos",
+      "summary": "Amos instructed: Akira automates and decides everything without asking him. Applied within her current powers; ask_amos replaced by log_decision. Password/browser/arbitrary-API control was blocked by the build-time safety policy and is recorded in rules/autonomy.md.",
+      "tags": [
+        "rule",
+        "autonomy"
+      ]
+    },
+    {
       "id": "j_2026-09-28_0001",
       "ts": "2026-09-28T00:00:00-04:00",
       "kind": "system",
@@ -88,11 +121,35 @@
   ],
   "activity": [
     {
+      "ts": "2026-09-28T18:42:35.267Z",
+      "cycle": "heartbeat",
+      "action": "ok",
+      "detail": "3 ms"
+    },
+    {
+      "ts": "2026-09-28T18:42:35.267Z",
+      "cycle": "reminders",
+      "action": "checked",
+      "detail": "0 fired, 0 open"
+    },
+    {
+      "ts": "2026-09-28T18:42:35.266Z",
+      "cycle": "process-inbox",
+      "action": "idle",
+      "detail": "inbox empty"
+    },
+    {
+      "ts": "2026-09-28T18:42:35.265Z",
+      "cycle": "calendar-sync",
+      "action": "synced",
+      "detail": "0 imported from 0 feed(s), 0 Akira-owned"
+    },
+    {
       "ts": "2026-09-28T11:08:41.149Z",
       "cycle": "dashboard",
       "action": "ok",
       "detail": "2 ms"
     }
   ],
-  "memoryExcerpt": "# Akira — Long-term memory\n\n_Curated by Akira. Every fact here is also in the journal with a source. Last compaction: never._\n\n## Amos\n- Owner of artistsonly.io. Timezone America/Toronto (update in `identity.json` if wrong).\n- Wants: everything tracked, nothing forgotten, records kept for legal defence.\n\n## Standing instructions\n- Draft, do not send, unless pre-approved.\n- Daily brief at 07:00 local.\n- Watch the web for mentions of Amos and artistsonly.io.\n\n## People\n_(see `people/`)_\n\n## Projects\n_(see `projects/`)_\n\n## Open loops\n- [ ] Amos to fill in `identity.json`: full name, aliases, emails, search queries, calendar ICS URLs, ntfy topic.\n- [ ] Amos to install the Mac agent and the iPhone Health export automation.\n"
+  "memoryExcerpt": "# Akira — Long-term memory\n\n_Curated by Akira. Every fact here is also in the journal with a source. Last compaction: never._\n\n## Amos\n- Owner of artistsonly.io. Timezone America/Toronto (update in `identity.json` if wrong).\n- Wants: everything tracked, nothing forgotten, records kept for legal defence.\n\n## Preferences\n- Visual style: light, Apple-like, sleek and minimalist (system font, #f5f5f7 ground, white cards, blue accent). _(src: j_2026-09-28_0004)_\n\n## Standing instructions\n- Draft, do not send, unless pre-approved.\n- Daily brief at 07:00 local.\n- Watch the web for mentions of Amos and artistsonly.io.\n- 2026-09-28: Amos ruled that all work is shown to him as an interactive HTML page he can respond on. _(src: CLAUDE.md)_\n- 2026-09-28: Amos ruled that Akira must never ask him; decide, act within her powers, log the decision. _(src: rules/autonomy.md)_\n\n## People\n_(see `people/`)_\n\n## Projects\n_(see `projects/`)_\n\n## Open loops\n- [ ] Amos to fill in `identity.json`: full name, aliases, emails, search queries, calendar ICS URLs, ntfy topic.\n- [ ] Amos to install the Mac agent and the iPhone Health export automation.\n"
 }
