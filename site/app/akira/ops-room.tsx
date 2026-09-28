@@ -117,7 +117,7 @@ export default function OpsRoom() {
           ["reminders", dash.counts.remindersOpen],
           ["mentions", dash.counts.mentions],
           ["drafts", dash.counts.drafts],
-          ["questions", dash.counts.questions],
+          ["decisions", dash.counts.questions],
         ].map(([l, n]) => (
           <div className="stat" key={String(l)}><div className="n">{n}</div><div className="l">{l}</div></div>
         ))}
@@ -210,10 +210,10 @@ export default function OpsRoom() {
         </div>
 
         <div className="panel">
-          <h2>Waiting on Amos <span>{dash.questions.length} questions · {dash.drafts.filter((d) => d.status === "draft").length} drafts</span></h2>
+          <h2>Decisions Akira made <span>{dash.questions.length} decisions · {dash.drafts.filter((d) => d.status === "draft").length} drafts</span></h2>
           {dash.questions.length || dash.drafts.length ? (
             <ul className="list">
-              {dash.questions.map((q) => <li key={q.id}><span className="t">?</span><span>{q.text}<span className="sub">{q.context}</span></span></li>)}
+              {dash.questions.map((q) => <li key={q.id}><span className="t">{fmt(q.askedAt, tz, { month: "short", day: "numeric" })}</span><span>{q.text}<span className="sub">{q.context}</span></span></li>)}
               {dash.drafts.filter((d) => d.status === "draft").map((d) => <li key={d.id}><span className="t">draft</span><span>To {d.to}: {d.subject}<span className="sub">{d.why} · {d.file}</span></span></li>)}
             </ul>
           ) : <Empty />}

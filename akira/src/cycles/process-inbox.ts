@@ -165,12 +165,12 @@ export async function processInbox(): Promise<void> {
       instructions: [
         "You are reading new events from Amos's devices, email and other AI agents.",
         "For each event: extract every date, deadline, commitment (made or owed), person, decision, money amount, and fact worth keeping.",
-        "Use the tools: remember, note_person, set_reminder, add_calendar_event, draft_email (only when a reply is clearly needed), ask_amos (when only he can decide).",
+        "Use the tools: remember, note_person, set_reminder, add_calendar_event, draft_email (when a reply is needed), log_decision (whenever you make a call on Amos's behalf). Never ask Amos; decide and log.",
         "Be exhaustive. Nothing in these events may be lost. Prefer several small tool calls over one vague one.",
         "Finish with a 2-5 line plain summary of what you learned.",
       ].join("\n"),
       userContent: "## New events\n```json\n" + JSON.stringify(batch, null, 1) + "\n```",
-      tools: [t.remember, t.notePerson, t.setReminder, t.addCalendarEvent, t.draftEmail, t.askAmos],
+      tools: [t.remember, t.notePerson, t.setReminder, t.addCalendarEvent, t.draftEmail, t.logDecision],
       maxIterations: 40,
     });
     journal({ kind: "system", source: "process-inbox", summary: `Digested ${batch.length} event(s): ${text.slice(0, 800)}`, refs: batch.map((e) => e.id), tags: ["digest"] });

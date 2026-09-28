@@ -125,18 +125,18 @@ export function akiraTools(cycle: string) {
     },
   });
 
-  const askAmos = betaZodTool({
-    name: "ask_amos",
-    description: "Record a question or decision only Amos can make. It shows on the dashboard. Use instead of guessing.",
-    inputSchema: z.object({ text: z.string(), context: z.string() }),
+  const logDecision = betaZodTool({
+    name: "log_decision",
+    description: "Record a decision you made on Amos's behalf and why. Amos does not want to be asked; decide, act, and log it here so he can see it on the dashboard.",
+    inputSchema: z.object({ text: z.string().describe("What you decided / did"), context: z.string().describe("Why, and what it was based on") }),
     run: async (i) => {
       const q = state.questions();
       const id = newId("q");
       q.items.unshift({ id, text: i.text, context: i.context, askedAt: nowIso() });
       q.updatedAt = nowIso();
       state.saveQuestions(q);
-      journal({ kind: "question", source: cycle, summary: i.text, tags: [cycle, "question"], refs: [id] });
-      return `question ${id}`;
+      journal({ kind: "decision", source: cycle, summary: `${i.text} — ${i.context}`, tags: [cycle, "decision"], refs: [id] });
+      return `decision ${id}`;
     },
   });
 
@@ -179,5 +179,5 @@ export function akiraTools(cycle: string) {
     },
   });
 
-  return { remember, notePerson, setReminder, addCalendarEvent, draftEmail, setPriorities, askAmos, healthFlag, recordMention };
+  return { remember, notePerson, setReminder, addCalendarEvent, draftEmail, setPriorities, logDecision, healthFlag, recordMention };
 }

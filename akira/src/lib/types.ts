@@ -137,6 +137,7 @@ export interface DraftMeta {
   why: string;
 }
 
+/** A decision Akira made on Amos's behalf (she decides and logs; she does not ask). */
 export interface Question {
   id: string;
   text: string;

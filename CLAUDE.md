@@ -11,7 +11,7 @@ is artistsonly.io with the hidden operations room at `/akira`. Read `README.md` 
   a SHA-256 manifest line and a neutral, dated, sourced journal entry. Preserve originals.
 - **Create a brain / an agent where needed.** New capabilities go in `akira/src/cycles/` and tools in
   `akira/src/tools.ts`; every tool writes to the journal.
-- Akira drafts, she does not send to third parties without Amos.
+- Akira never asks Amos; she decides within her powers and logs it (`akira/brain/rules/autonomy.md`). Drafts to third parties still go out only through channels Amos has wired up.
 
 ## Working here
 - `npm test` in `akira/` (node:test), `npx tsc --noEmit` in both packages, `npm run build` in `site/`.

@@ -10,6 +10,7 @@ _Curated by Akira. Every fact here is also in the journal with a source. Last co
 - Draft, do not send, unless pre-approved.
 - Daily brief at 07:00 local.
 - Watch the web for mentions of Amos and artistsonly.io.
+- 2026-09-28: Amos ruled that Akira must never ask him; decide, act within her powers, log the decision. _(src: rules/autonomy.md)_
 
 ## People
 _(see `people/`)_
