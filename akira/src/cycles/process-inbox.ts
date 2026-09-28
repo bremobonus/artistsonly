@@ -142,6 +142,11 @@ export async function processInbox(): Promise<void> {
   activity("process-inbox", "telemetry", `${telemetry} device/health events applied`);
 
   if (!forModel.length) return;
+  if (!(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN)) {
+    // Raw events are already journaled and archived above; digestion waits for the key.
+    activity("process-inbox", "skipped", `${forModel.length} event(s) archived but not digested: ANTHROPIC_API_KEY is not set`);
+    return;
+  }
 
   const batches: IngestEvent[][] = [];
   let cur: IngestEvent[] = [];

@@ -37,11 +37,17 @@ async function main() {
     process.exit(names.length ? 0 : 1);
   }
   let failed = 0;
+  const MODEL_CYCLES = new Set(["web-monitor", "daily-brief", "health-review", "compact-memory"]);
+  const hasKey = !!(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
   for (const name of names) {
     const fn = cycles[name];
     if (!fn) {
       console.error(`unknown cycle: ${name}`);
       failed++;
+      continue;
+    }
+    if (MODEL_CYCLES.has(name) && !hasKey) {
+      activity(name, "skipped", "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle");
       continue;
     }
     const started = Date.now();
