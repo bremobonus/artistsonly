@@ -1,0 +1,94 @@
+name: Akira (always on)
+
+# Akira runs as scheduled GitHub Actions jobs and commits her brain back to the repo.
+# Cron is UTC. Amos is in America/Toronto (UTC-4 in summer, UTC-5 in winter); adjust the brief hour if needed.
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # heartbeat: inbox, calendar, reminders
+    - cron: "7 * * * *"      # web monitor, hourly
+    - cron: "0 11 * * *"     # daily brief 07:00 Toronto (EDT); 06:00 in winter
+    - cron: "30 12 * * 0"    # weekly health review + memory compaction, Sunday morning
+  push:
+    branches: [main]
+    paths:
+      - "akira/brain/memory/inbox/**"   # an ingested event wakes Akira within a minute or two
+  workflow_dispatch:
+    inputs:
+      cycles:
+        description: "Space-separated cycles (heartbeat, web-monitor, daily-brief, health-review, compact-memory, dashboard)"
+        default: "heartbeat"
+
+concurrency:
+  group: akira-brain
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: akira/package-lock.json
+
+      - name: Decide which cycles to run
+        id: plan
+        shell: bash
+        env:
+          EVENT: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
+          INPUT: ${{ github.event.inputs.cycles }}
+        run: |
+          case "$EVENT" in
+            workflow_dispatch) CYCLES="$INPUT" ;;
+            push) CYCLES="heartbeat" ;;
+            schedule)
+              case "$SCHEDULE" in
+                "*/15 * * * *") CYCLES="heartbeat" ;;
+                "7 * * * *")    CYCLES="web-monitor" ;;
+                "0 11 * * *")   CYCLES="heartbeat daily-brief" ;;
+                "30 12 * * 0")  CYCLES="health-review compact-memory" ;;
+                *)              CYCLES="heartbeat" ;;
+              esac ;;
+            *) CYCLES="heartbeat" ;;
+          esac
+          echo "cycles=$CYCLES" >> "$GITHUB_OUTPUT"
+          echo "Running: $CYCLES"
+
+      - name: Install
+        working-directory: akira
+        run: npm ci
+
+      - name: Run Akira
+        working-directory: akira
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AKIRA_MODEL: ${{ vars.AKIRA_MODEL }}
+          AKIRA_NTFY_TOPIC: ${{ secrets.AKIRA_NTFY_TOPIC }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          AKIRA_NOTIFY_EMAIL_TO: ${{ secrets.AKIRA_NOTIFY_EMAIL_TO }}
+        run: npx tsx src/index.ts ${{ steps.plan.outputs.cycles }} || echo "::warning::one or more cycles failed; state still committed"
+
+      - name: Commit brain
+        shell: bash
+        run: |
+          git config user.name "Akira"
+          git config user.email "akira@artistsonly.io"
+          git add -A akira/brain
+          if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
+          git commit -m "[akira] ${{ steps.plan.outputs.cycles }} $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            sleep $((i * 5))
+          done
+          echo "::error::could not push brain after retries"; exit 1

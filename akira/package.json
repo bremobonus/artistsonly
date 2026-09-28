@@ -1,0 +1,24 @@
+{
+  "name": "akira",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Akira — Amos's always-on AI chief of staff. Brain, memory and cycles.",
+  "type": "module",
+  "bin": { "akira": "./dist/index.js" },
+  "scripts": {
+    "akira": "tsx src/index.ts",
+    "heartbeat": "tsx src/index.ts heartbeat",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "test": "node --test --import tsx test/*.test.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}

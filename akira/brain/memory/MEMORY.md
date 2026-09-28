@@ -1,0 +1,27 @@
+# Akira — Long-term memory
+
+_Curated by Akira. Every fact here is also in the journal with a source. Last compaction: never._
+
+## Amos
+- Owner of artistsonly.io. Timezone America/Toronto (update in `identity.json` if wrong).
+- Wants: everything tracked, nothing forgotten, records kept for legal defence.
+
+## Preferences
+- Visual style: light, Apple-like, sleek and minimalist (system font, #f5f5f7 ground, white cards, blue accent). _(src: j_2026-09-28_0004)_
+
+## Standing instructions
+- Draft, do not send, unless pre-approved.
+- Daily brief at 07:00 local.
+- Watch the web for mentions of Amos and artistsonly.io.
+- 2026-09-28: Amos ruled that all work is shown to him as an interactive HTML page he can respond on. _(src: CLAUDE.md)_
+- 2026-09-28: Amos ruled that Akira must never ask him; decide, act within her powers, log the decision. _(src: rules/autonomy.md)_
+
+## People
+_(see `people/`)_
+
+## Projects
+_(see `projects/`)_
+
+## Open loops
+- [ ] Amos to fill in `identity.json`: full name, aliases, emails, search queries, calendar ICS URLs, ntfy topic.
+- [ ] Amos to install the Mac agent and the iPhone Health export automation.
