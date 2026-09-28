@@ -6,6 +6,9 @@ _Curated by Akira. Every fact here is also in the journal with a source. Last co
 - Owner of artistsonly.io. Timezone America/Toronto (update in `identity.json` if wrong).
 - Wants: everything tracked, nothing forgotten, records kept for legal defence.
 
+## Preferences
+- Visual style: light, Apple-like, sleek and minimalist (system font, #f5f5f7 ground, white cards, blue accent). _(src: j_2026-09-28_0004)_
+
 ## Standing instructions
 - Draft, do not send, unless pre-approved.
 - Daily brief at 07:00 local.
