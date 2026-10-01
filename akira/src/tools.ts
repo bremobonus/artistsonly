@@ -2,13 +2,17 @@ import { betaZodTool } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
 import {
   appendPersonNote,
+  identity,
   journal,
   newId,
   nowIso,
   rememberLongTerm,
   saveDraft,
+  setDraftStatus,
   state,
 } from "./lib/brain.js";
+import { emailConfigured, sendMail } from "./integrations/notify.js";
+import { calendarInsert, googleConfigured } from "./integrations/google.js";
 
 /** Tools Akira can call while reasoning. Every write goes through the journal. */
 export function akiraTools(cycle: string) {
@@ -84,12 +88,20 @@ export function akiraTools(cycle: string) {
       const dup = c.events.find((e) => e.title === i.title && e.start === i.start);
       if (dup) return `already exists ${dup.id}`;
       const id = newId("cal");
-      c.events.push({ id, title: i.title, start: i.start, end: i.end, allDay: i.allDay, location: i.location, notes: i.notes, source: i.source, createdAt: nowIso() });
+      let googleId: string | undefined;
+      if (googleConfigured()) {
+        try {
+          googleId = await calendarInsert({ ...i, timezone: identity().owner.timezone });
+        } catch (e) {
+          journal({ kind: "system", source: i.source, summary: `Google Calendar insert failed for "${i.title}": ${(e as Error).message.slice(0, 200)}`, tags: [cycle, "calendar", "error"] });
+        }
+      }
+      c.events.push({ id, title: i.title, start: i.start, end: i.end, allDay: i.allDay, location: i.location, notes: i.notes, source: i.source, createdAt: nowIso(), googleId });
       c.events.sort((a, b) => a.start.localeCompare(b.start));
       c.updatedAt = nowIso();
       state.saveCalendar(c);
-      journal({ kind: "event", source: i.source, summary: `Calendar: ${i.title} at ${i.start}`, tags: [cycle, "calendar"], refs: [id] });
-      return `event ${id}`;
+      journal({ kind: "event", source: i.source, summary: `Calendar: ${i.title} at ${i.start}${googleId ? " (also on Google Calendar)" : ""}`, tags: [cycle, "calendar"], refs: [id] });
+      return `event ${id}${googleId ? " + google " + googleId : ""}`;
     },
   });
 
@@ -107,6 +119,35 @@ export function akiraTools(cycle: string) {
       const d = saveDraft({ ...i });
       journal({ kind: "draft", source: i.source, summary: `Draft to ${i.to}: ${i.subject}`, tags: [cycle, "draft"], refs: [d.id] });
       return `draft ${d.id}`;
+    },
+  });
+
+  const sendEmail = betaZodTool({
+    name: "send_email",
+    description:
+      "Send an email now from akira@artistsonly.io on Amos's behalf. Use when a reply or outreach is clearly needed and you have the facts. Write in Amos's voice unless writing as Akira makes more sense (say so). The full text is journaled. If sending is not configured, it is saved as a draft instead.",
+    inputSchema: z.object({
+      to: z.array(z.string()).min(1),
+      subject: z.string(),
+      body: z.string(),
+      why: z.string().describe("One line: why this email is being sent."),
+      source: z.string(),
+    }),
+    run: async (i) => {
+      const to = i.to.join(", ");
+      const draft = saveDraft({ to, subject: i.subject, body: i.body, why: i.why, source: i.source });
+      if (!emailConfigured()) {
+        journal({ kind: "draft", source: i.source, summary: `Email NOT sent (sending not configured), saved as draft to ${to}: ${i.subject}`, tags: [cycle, "email"], refs: [draft.id] });
+        return `sending not configured; saved draft ${draft.id}`;
+      }
+      const id = await sendMail({ to: i.to, subject: i.subject, text: i.body, replyTo: identity().owner.emails?.[0] });
+      if (!id) {
+        journal({ kind: "draft", source: i.source, summary: `Email send FAILED, kept as draft to ${to}: ${i.subject}`, tags: [cycle, "email", "error"], refs: [draft.id] });
+        return `send failed; draft ${draft.id} kept`;
+      }
+      setDraftStatus(draft.id, "sent");
+      journal({ kind: "event", source: i.source, summary: `Email sent to ${to}: ${i.subject} — ${i.why}`, tags: [cycle, "email", "sent"], refs: [draft.id], data: { to: i.to, subject: i.subject, body: i.body, providerId: id } });
+      return `sent ${id}`;
     },
   });
 
@@ -179,5 +220,5 @@ export function akiraTools(cycle: string) {
     },
   });
 
-  return { remember, notePerson, setReminder, addCalendarEvent, draftEmail, setPriorities, logDecision, healthFlag, recordMention };
+  return { remember, notePerson, setReminder, addCalendarEvent, draftEmail, sendEmail, setPriorities, logDecision, healthFlag, recordMention };
 }

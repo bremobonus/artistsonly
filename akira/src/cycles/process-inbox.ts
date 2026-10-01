@@ -142,6 +142,11 @@ export async function processInbox(): Promise<void> {
   activity("process-inbox", "telemetry", `${telemetry} device/health events applied`);
 
   if (!forModel.length) return;
+  if (!(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN)) {
+    // Raw events are already journaled and archived above; digestion waits for the key.
+    activity("process-inbox", "skipped", `${forModel.length} event(s) archived but not digested: ANTHROPIC_API_KEY is not set`);
+    return;
+  }
 
   const batches: IngestEvent[][] = [];
   let cur: IngestEvent[] = [];
@@ -165,12 +170,12 @@ export async function processInbox(): Promise<void> {
       instructions: [
         "You are reading new events from Amos's devices, email and other AI agents.",
         "For each event: extract every date, deadline, commitment (made or owed), person, decision, money amount, and fact worth keeping.",
-        "Use the tools: remember, note_person, set_reminder, add_calendar_event, draft_email (when a reply is needed), log_decision (whenever you make a call on Amos's behalf). Never ask Amos; decide and log.",
+        "Use the tools: remember, note_person, set_reminder, add_calendar_event, send_email (when a reply or outreach is clearly needed and you have the facts), draft_email (when you lack a fact only Amos knows), log_decision (whenever you make a call on Amos's behalf). Never ask Amos; decide and log.",
         "Be exhaustive. Nothing in these events may be lost. Prefer several small tool calls over one vague one.",
         "Finish with a 2-5 line plain summary of what you learned.",
       ].join("\n"),
       userContent: "## New events\n```json\n" + JSON.stringify(batch, null, 1) + "\n```",
-      tools: [t.remember, t.notePerson, t.setReminder, t.addCalendarEvent, t.draftEmail, t.logDecision],
+      tools: [t.remember, t.notePerson, t.setReminder, t.addCalendarEvent, t.sendEmail, t.draftEmail, t.logDecision],
       maxIterations: 40,
     });
     journal({ kind: "system", source: "process-inbox", summary: `Digested ${batch.length} event(s): ${text.slice(0, 800)}`, refs: batch.map((e) => e.id), tags: ["digest"] });

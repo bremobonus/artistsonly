@@ -285,6 +285,16 @@ export function storeDocument(opts: {
 
 // ---------- drafts ----------
 
+export function setDraftStatus(id: string, status: DraftMeta["status"]): void {
+  const idx = state.drafts();
+  const d = idx.items.find((x) => x.id === id);
+  if (d) {
+    d.status = status;
+    idx.updatedAt = nowIso();
+    state.saveDrafts(idx);
+  }
+}
+
 export function saveDraft(d: { to: string; subject: string; body: string; why: string; source: string }): DraftMeta {
   ensureDir(PATHS.drafts);
   const id = newId("draft");

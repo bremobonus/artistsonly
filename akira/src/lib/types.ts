@@ -44,6 +44,8 @@ export interface CalendarEvent {
   notes?: string;
   source: string;
   createdAt: string;
+  /** Google Calendar event id when the event was pushed to or pulled from Google. */
+  googleId?: string;
 }
 
 export interface Reminder {
