@@ -77,6 +77,9 @@ jobs:
           AKIRA_NTFY_TOPIC: ${{ secrets.AKIRA_NTFY_TOPIC }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           AKIRA_NOTIFY_EMAIL_TO: ${{ secrets.AKIRA_NOTIFY_EMAIL_TO }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
         run: npx tsx src/index.ts ${{ steps.plan.outputs.cycles }} || echo "::warning::one or more cycles failed; state still committed"
 
       - name: Commit brain

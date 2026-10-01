@@ -45,13 +45,15 @@ Every write goes through the journal. Every file received gets a manifest line w
 | Claude Code, real time | `integrations/claude-code-hook` |
 | other AI agents | export → drop folder, or POST `source=conversation` |
 | email to akira@artistsonly.io | Cloudflare Email Worker → `/api/akira/email` (attachments archived) |
+| Amos's Gmail | `gmail-sync` every heartbeat, read-only scope |
+| Google Calendar | pulled every heartbeat; events Akira creates are pushed to the primary calendar |
 | the dashboard | "Tell Akira" box on `/akira` |
 | the internet | web-monitor cycle |
 
 ## Data out
 - `/akira` operations room (gated by `AKIRA_DASHBOARD_KEY`, `noindex`, 404 to anyone else).
 - Calendar feed `/api/akira/calendar?k=…` to subscribe to in Apple/Google Calendar.
-- Push via ntfy, email via Resend. Drafts are saved in `akira/brain/state/drafts/`; nothing is sent to third parties without Amos.
+- Push via ntfy. Email sent as akira@artistsonly.io via Resend; every send is journaled with its full text and kept in `akira/brain/state/drafts/` with status `sent`.
 
 ## Setup (one time)
 1. **Secrets.** Generate two long random strings: `AKIRA_DASHBOARD_KEY`, `AKIRA_INGEST_SECRET`.
@@ -63,6 +65,10 @@ Every write goes through the journal. Every file received gets a manifest line w
 5. **Devices.** Run `integrations/mac-agent/install.sh` on each Mac; follow `integrations/ios/README.md` on the phone.
 6. **Email.** Follow `integrations/email-cloudflare-worker/README.md`.
 7. Open `https://artistsonly.io/akira?k=<AKIRA_DASHBOARD_KEY>` once; the cookie keeps you in.
+8. **Google** (Gmail read-only, Calendar events): Google Cloud Console → new project → enable *Gmail API* and
+   *Google Calendar API* → Credentials → OAuth client, type *Desktop app*. On your Mac:
+   `cd akira && GOOGLE_CLIENT_ID=… GOOGLE_CLIENT_SECRET=… npm run google-auth`, approve, and add the printed
+   `GOOGLE_REFRESH_TOKEN` with the id and secret as Actions secrets.
 
 Keep this repository **private**: it is Amos's memory.
 
