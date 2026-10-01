@@ -9,6 +9,7 @@ import { dailyBrief } from "./cycles/daily-brief.js";
 import { healthReview } from "./cycles/health.js";
 import { compactMemory } from "./cycles/compact-memory.js";
 import { gmailSync } from "./cycles/gmail-sync.js";
+import { turokPricing, turokTick } from "./cycles/turok.js";
 
 const cycles: Record<string, () => Promise<void>> = {
   "calendar-sync": calendarSync,
@@ -19,6 +20,8 @@ const cycles: Record<string, () => Promise<void>> = {
   "daily-brief": dailyBrief,
   "health-review": healthReview,
   "compact-memory": compactMemory,
+  turok: turokTick,
+  "turok-pricing": turokPricing,
   dashboard: async () => {
     buildDashboard();
   },
@@ -26,6 +29,7 @@ const cycles: Record<string, () => Promise<void>> = {
     await calendarSync();
     await gmailSync();
     await processInbox();
+    await turokTick();
     await remindersDue();
   },
 };
@@ -37,7 +41,7 @@ async function main() {
     process.exit(names.length ? 0 : 1);
   }
   let failed = 0;
-  const MODEL_CYCLES = new Set(["web-monitor", "daily-brief", "health-review", "compact-memory"]);
+  const MODEL_CYCLES = new Set(["web-monitor", "daily-brief", "health-review", "compact-memory", "turok-pricing"]);
   const hasKey = !!(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
   for (const name of names) {
     const fn = cycles[name];

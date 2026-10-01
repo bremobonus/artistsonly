@@ -33,6 +33,7 @@ GitHub Actions runs her on a schedule and commits the brain back to `main`:
 | daily-brief | 07:00 Toronto | priorities for the day, calendar, reminders, health, questions, drafts → push + email |
 | health-review | Sunday | 90-day trends from Apple Watch data |
 | compact-memory | Sunday | tidy MEMORY.md (old version journaled first) |
+| turok-pricing | 06:20 Toronto | Turok scans for local demand events, reprices every Turo car for 60 days |
 
 Every write goes through the journal. Every file received gets a manifest line with its hash.
 
@@ -49,6 +50,30 @@ Every write goes through the journal. Every file received gets a manifest line w
 | Google Calendar | pulled every heartbeat; events Akira creates are pushed to the primary calendar |
 | the dashboard | "Tell Akira" box on `/akira` |
 | the internet | web-monitor cycle |
+
+## Turok — the Turo agent
+**Turok** (`akira/TUROK.md`) runs Amos's Turo host business inside Akira's brain.
+
+| does | how |
+|---|---|
+| reads every Turo email | Gmail sync → mail from `*@turo.com` is routed to Turok, not the general digest |
+| tracks fleet, trips, guests | `akira/brain/state/turo.json` (cars, trips, every guest message in/out, outbox, prices) |
+| answers guests | writes the reply in Amos's voice from the car's pickup / check-in notes and house rules; never invents a fact |
+| welcome, pre-trip, checkout, thank-you | sent from templates in `akira/brain/turo/config.json` at the right time, every heartbeat, no model needed |
+| accepts / declines requests | decides per `config.booking` (conflicts, buffer, minimum days) and logs the decision |
+| sets prices | base × weekday × season × local events × last-minute × utilisation, clamped to floor/ceiling, 60 days ahead |
+| protects money | calendar entry per trip, prep reminder, post-trip inspection + damage-claim deadline, tolls/fuel reimbursement reminder |
+
+**How actions reach Turo.** Turo has no public host API and Amos has not given anyone his Turo login
+(`akira/brain/rules/autonomy.md`), so Turok prepares each action — exact message text or price list, the
+reason, the link — in the **Turo outbox**, pushes it to Amos's phone, and shows it on `/akira` with
+*Copy* / *Done in Turo* / *Skip*. "Done" on prices records them as live, so Turok only re-sends real changes.
+Any future approved channel (official API, channel manager) can execute the same outbox and report back with
+`POST /api/akira/ingest?source=turo&type=action-result` `{"actionId": "...", "status": "done"}`.
+
+**Setup.** Gmail must be connected (Turo emails are the feed). Then give each car a `basePrice` (and
+`minPrice`/`maxPrice`, `pickup`, `checkin`) — tell Akira in the "Tell Akira" box, or edit
+`akira/brain/state/turo.json`. Cars appear automatically from booking emails; pricing starts once a base price is known.
 
 ## Data out
 - `/akira` operations room (gated by `AKIRA_DASHBOARD_KEY`, `noindex`, 404 to anyone else).

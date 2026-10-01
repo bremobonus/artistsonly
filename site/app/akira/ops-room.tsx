@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { Dashboard, HealthDaily } from "@/lib/akira-types";
+import type { Dashboard, HealthDaily, TuroAction } from "@/lib/akira-types";
 
 const REFRESH_MS = 30_000;
 
@@ -49,6 +49,8 @@ export default function OpsRoom() {
   const [note, setNote] = useState("");
   const [sending, setSending] = useState(false);
   const [clock, setClock] = useState("");
+  const [busy, setBusy] = useState<string | null>(null);
+  const [handled, setHandled] = useState<Record<string, string>>({});
 
   const load = useCallback(async () => {
     try {
@@ -87,12 +89,24 @@ export default function OpsRoom() {
     }
   }
 
+  async function turoResult(a: TuroAction, status: "done" | "skipped") {
+    setBusy(a.id);
+    try {
+      const r = await fetch("/api/akira/ingest?source=turo&device=dashboard&type=action-result", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actionId: a.id, status }) });
+      if (r.ok) setHandled((h) => ({ ...h, [a.id]: status }));
+      else setErr(`Turok: HTTP ${r.status}`);
+    } finally {
+      setBusy(null);
+    }
+  }
+
   if (err && !dash) return <main className="ops"><div className="err">Akira: {err}</div></main>;
   if (!dash) return <main className="ops"><div className="empty">loading…</div></main>;
 
   const tz = dash.owner.timezone;
   const h = dash.health;
   const stale = Object.values(dash.devices.devices);
+  const turo = dash.turo;
 
   return (
     <main className="ops">
@@ -218,6 +232,47 @@ export default function OpsRoom() {
             </ul>
           ) : <Empty />}
         </div>
+
+        {turo && (turo.vehicles.length || turo.trips.length || turo.outbox.length) ? (
+          <div className="panel wide">
+            <h2>Turok · Turo <span>{turo.vehicles.length} car(s) · {turo.outbox.length} to apply · priced {ago(turo.lastPricingAt)}</span></h2>
+            {turo.outbox.length ? (
+              <ul className="list">
+                {turo.outbox.map((a) => (
+                  <li key={a.id}>
+                    <span className="t">{a.kind.replace("_", " ")}</span>
+                    <span>
+                      {a.link ? <a href={a.link} target="_blank" rel="noreferrer noopener">{a.title}</a> : a.title}
+                      {a.needs && <span className="tag high">needs: {a.needs}</span>}
+                      <span className="sub" style={{ whiteSpace: "pre-wrap" }}>{a.body}</span>
+                      <span className="sub">{a.why}</span>
+                      {handled[a.id] ? <span className="tag done">{handled[a.id]}</span> : (
+                        <span className="note" style={{ marginTop: 6 }}>
+                          <button onClick={() => navigator.clipboard?.writeText(a.body)}>Copy</button>
+                          <button onClick={() => turoResult(a, "done")} disabled={busy === a.id}>Done in Turo</button>
+                          <button onClick={() => turoResult(a, "skipped")} disabled={busy === a.id} style={{ background: "var(--bg-2)", color: "var(--text)" }}>Skip</button>
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : <Empty text="nothing to apply in Turo" />}
+            <ul className="list" style={{ marginTop: 10 }}>
+              {turo.trips.map((t) => (
+                <li key={t.id}><span className="t">{fmt(t.start, tz)}</span><span>{t.guest} · {turo.vehicles.find((v) => v.id === t.vehicleId)?.name ?? "car"}<span className={`tag ${t.status === "requested" ? "high" : t.status === "cancelled" ? "act" : "done"}`}>{t.status}</span><span className="sub">until {fmt(t.end, tz)}{typeof t.total === "number" ? ` · $${t.total} ${turo.currency}` : ""}</span></span></li>
+              ))}
+            </ul>
+            {turo.vehicles.map((v) => (turo.prices[v.id]?.length ? (
+              <p key={v.id} className="sub" style={{ color: "var(--muted)", fontSize: 13 }}>{v.name}: {turo.prices[v.id].map((d) => `${d.date.slice(5)} ${d.booked ? "booked" : `$${d.price}`}`).join(" · ")}</p>
+            ) : null))}
+            {turo.messages.length ? (
+              <div className="feed" style={{ marginTop: 10 }}>
+                {turo.messages.map((m) => <div key={m.id}><span className="t">{fmt(m.ts, tz)} · {m.direction === "in" ? m.guest : "Amos"}</span><span>{m.text}</span></div>)}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="panel wide">
           <h2>Journal <span>latest {dash.journalRecent.length} of {dash.counts.journalEntries}</span></h2>

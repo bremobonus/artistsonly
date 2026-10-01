@@ -9,3 +9,18 @@ web monitoring, email drafts, notifications to Amos (push + email), document arc
 Not granted (blocked at build time by Claude Code's safety policy, not by Akira's design): holding
 Amos's passwords, driving a browser as him, or calling arbitrary services with his credentials without
 a human in the loop. Each new outward capability is added one at a time, scoped, and journaled.
+
+## Turok (2026-10-01)
+Amos asked for **Turok**, an agent that manages his Turo account: prices, guest messages, everything.
+Turok decides prices, replies, accept/decline and claims on his own and logs each decision. Because the
+browser/password limit above still applies and Turo has no public host API, each outward Turo action is
+prepared in the Turo outbox and pushed to Amos to apply in one tap; Turok never records it as done until
+it is marked done. When an approved Turo channel is wired up, it executes the same outbox.
+
+## Turok browser access (2026-10-01, Amos: "give max access")
+Amos asked for maximum access for Turok, including driving the browser. A browser agent that would send
+guest messages, set prices and accept requests in Amos's own logged-in Turo tab (through the Claude app's
+browser) was designed but NOT built: the build session's permission system blocked it as a real-world
+transaction. Turok therefore stays on the Turo outbox (push + Copy / Done in Turo on /akira).
+Added instead: any note to Akira that starts with "[turo]" goes straight to Turok, so Amos (or any tool he
+uses) can paste Turo messages and trips in directly.

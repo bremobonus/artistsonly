@@ -2,9 +2,11 @@ import path from "node:path";
 import { PATHS } from "../config.js";
 import { identity, journalCount, journalRecent, manifestCount, memory, nowIso, state, writeJson } from "./brain.js";
 import type { Dashboard } from "./types.js";
+import { loadTuro, turoConfig } from "./turo.js";
 
 export const SCHEDULE = [
-  { name: "heartbeat (Gmail, calendar, inbox, reminders)", every: "15 min" },
+  { name: "heartbeat (Gmail, calendar, inbox, Turok, reminders)", every: "15 min" },
+  { name: "turok-pricing (Turo demand scan + prices)", every: "06:20 local" },
   { name: "web-monitor", every: "hourly" },
   { name: "daily-brief", every: "07:00 local" },
   { name: "health-review", every: "Sunday" },
@@ -26,6 +28,7 @@ export function buildDashboard(): Dashboard {
   }
   const lastCycle = act[0];
   const status: Dashboard["assistant"]["status"] = lastCycle && now - Date.parse(lastCycle.ts) < 2 * 3600_000 ? "online" : "degraded";
+  const turo = loadTuro();
   const dash: Dashboard = {
     generatedAt: nowIso(),
     assistant: { name: id.assistant.name, email: id.assistant.email, version: id.assistant.version, status },
@@ -51,6 +54,15 @@ export function buildDashboard(): Dashboard {
     journalRecent: journalRecent(30),
     activity: act.slice(0, 60),
     memoryExcerpt: memory().slice(0, 4000),
+    turo: {
+      vehicles: turo.vehicles,
+      trips: turo.trips.filter((t) => Date.parse(t.end) >= now - 3 * 86400_000 || t.status === "requested").slice(0, 30),
+      outbox: turo.outbox.filter((a) => a.status === "queued").slice(0, 40),
+      messages: turo.messages.slice(-20).reverse(),
+      prices: Object.fromEntries(Object.entries(turo.prices).map(([k, v]) => [k, v.slice(0, 14)])),
+      lastPricingAt: turo.lastPricingAt,
+      currency: turoConfig().currency ?? "CAD",
+    },
   };
   writeJson(path.join(PATHS.state, "dashboard.json"), dash);
   return dash;
