@@ -37,7 +37,7 @@ description: Operate, extend or debug Akira, Amos's always-on AI chief of staff 
 - Persona `akira/TUROK.md`; policy `akira/brain/turo/config.json`; state `akira/brain/state/turo.json`.
 - Code: `akira/src/lib/turo.ts` (pricing engine, lifecycle, outbox, pure + tested), `akira/src/cycles/turok.ts`
   (`turokDigest` for Turo emails, `turokTick` every heartbeat, `turokPricing` daily), tools in `turokTools()` in `tools.ts`.
-- Turo email (`*@turo.com`) and `source=turo` events are routed to Turok in `process-inbox.ts`.
+- Turo email (`*@turo.com`), `source=turo` events and notes starting with `[turo]` are routed to Turok in `process-inbox.ts`.
 - Outbound Turo actions are queued, never claimed as done until marked done (dashboard button, ingest `action-result`, or Amos telling Akira).
 - Test: `npm test` (`test/turok.test.ts`); run: `AKIRA_ROOT=<tmp> AKIRA_DRY_RUN=1 npx tsx src/index.ts turok`.
 

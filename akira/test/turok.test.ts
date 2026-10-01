@@ -28,6 +28,13 @@ test("isTuroEmail matches Turo senders only", () => {
   assert.ok(!turo.isTuroEmail(undefined));
 });
 
+test("isTuroNote routes [turo] notes to Turok only", () => {
+  assert.ok(turo.isTuroNote("note", { text: "[turo] Sam asked about parking" }));
+  assert.ok(turo.isTuroNote("note", { text: "  [TURO] sync" }));
+  assert.ok(!turo.isTuroNote("note", { text: "buy milk" }));
+  assert.ok(!turo.isTuroNote("email", { text: "[turo] x" }));
+});
+
 test("priceCalendar applies weekday, season, demand, clamps", () => {
   // 2026-07-18 is a Saturday in July: 100 × 1.18 × 1.22 = 144, then busy/quiet adjustments.
   const days = turo.priceCalendar({ vehicle: car, today: "2026-07-14", booked: new Set(), demand: [], rules });

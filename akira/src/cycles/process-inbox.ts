@@ -5,7 +5,7 @@ import { activity, archiveRaw, identity, journal, listInbox, nowIso, state, stor
 import { runAgent } from "../lib/claude.js";
 import { akiraTools, turokTools } from "../tools.js";
 import type { HealthDaily, IngestEvent } from "../lib/types.js";
-import { isTuroEmail, loadTuro } from "../lib/turo.js";
+import { isTuroEmail, isTuroNote, loadTuro } from "../lib/turo.js";
 import { applyTuroResults, turokDigest } from "./turok.js";
 
 /** Deterministic handlers for high-volume telemetry; everything else goes to the model. */
@@ -129,7 +129,7 @@ export async function processInbox(): Promise<void> {
       } else if (event.source === "location") {
         handleDevice({ ...event, source: "device", payload: { summary: `location: ${JSON.stringify(event.payload)}` } });
         telemetry++;
-      } else if (event.source === "turo" || (event.source === "email" && isTuroEmail((event.payload as { from?: string } | undefined)?.from))) {
+      } else if (event.source === "turo" || isTuroNote(event.source, event.payload) || (event.source === "email" && isTuroEmail((event.payload as { from?: string } | undefined)?.from))) {
         // Turo mail and Turo events belong to Turok, Akira's Turo agent.
         forTurok.push(event);
       } else if (event.source === "document") {

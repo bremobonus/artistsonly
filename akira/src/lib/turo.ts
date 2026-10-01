@@ -64,6 +64,12 @@ export function isTuroEmail(from: string | undefined): boolean {
   return !!from && /@([a-z0-9-]+\.)*turo\.com\b/i.test(from);
 }
 
+/** Notes posted to Akira that start with "[turo]" (e.g. by the Apply-in-Turo browser agent) are for Turok. */
+export function isTuroNote(source: string, payload: unknown): boolean {
+  const text = (payload as { text?: unknown } | undefined)?.text;
+  return source === "note" && typeof text === "string" && /^\s*\[turo\]/i.test(text);
+}
+
 // ---------- dates ----------
 
 const DAY = 86400_000;
