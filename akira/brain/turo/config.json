@@ -1,0 +1,50 @@
+{
+  "_about": "Turok's policy for Amos's Turo business. Vehicles live in state/turo.json (added by Turok from Turo emails or by Amos). Edit anything here; Turok reads it every cycle.",
+  "hostName": "Amos",
+  "currency": "CAD",
+  "links": {
+    "turo": "https://turo.com",
+    "_note": "Per-trip reservation links and per-car listing links are taken from Turo's emails when present."
+  },
+  "pricing": {
+    "horizonDays": 60,
+    "dayOfWeekMultipliers": [1.05, 0.95, 0.92, 0.92, 1.0, 1.15, 1.18],
+    "_dayOfWeek": "Sunday..Saturday",
+    "monthMultipliers": [0.85, 0.85, 0.92, 0.97, 1.05, 1.15, 1.22, 1.22, 1.08, 1.0, 0.92, 1.05],
+    "_month": "January..December (Toronto seasonality: summer and December holidays peak)",
+    "lastMinuteDays": 3,
+    "lastMinuteMultiplier": 0.9,
+    "highUtilisation": 0.8,
+    "highUtilisationMultiplier": 1.1,
+    "lowUtilisation": 0.3,
+    "lowUtilisationMultiplier": 0.92,
+    "minChangeDollars": 3,
+    "minChangePercent": 0.05
+  },
+  "booking": {
+    "autoAcceptUnlessConflict": true,
+    "minTripDays": 1,
+    "bufferHoursBetweenTrips": 3
+  },
+  "lifecycle": {
+    "preTripHoursBefore": 24,
+    "checkoutReminderHoursBefore": 3,
+    "thankYouHoursAfter": 2,
+    "prepReminderHoursBefore": 12,
+    "damageClaimWindowHours": 24,
+    "reimbursementWindowDays": 90,
+    "_policyNote": "Claim windows mirror Turo host policy as Turok understands it; check Turo's current host policies and adjust here."
+  },
+  "houseRules": [
+    "No smoking or vaping in the car.",
+    "Pets only if agreed in advance in Turo messages.",
+    "Return with the same fuel / charge level as at pickup.",
+    "Tolls, tickets and speeding fines are the guest's responsibility and are billed through Turo."
+  ],
+  "templates": {
+    "booked": "Hi {guest}, thanks for booking the {vehicle}! You're all set for {start}. I'll send pickup details the day before. Any questions, just message me here. — {host}",
+    "preTrip": "Hi {guest}, your trip with the {vehicle} starts {start}.\nPickup: {pickup}\n{checkin}\nPlease take photos of the car (outside, inside, fuel/charge, odometer) in the Turo app at pickup. Safe travels! — {host}",
+    "checkoutReminder": "Hi {guest}, quick reminder your trip ends {end}. Please return the {vehicle} to {pickup} with the same fuel/charge level and take return photos in the Turo app. Thanks! — {host}",
+    "thankYou": "Thanks {guest}, it was a pleasure hosting you in the {vehicle}. Hope the trip was great. If you have a moment, a review on Turo helps a lot. You're welcome back anytime! — {host}"
+  }
+}

@@ -6,6 +6,7 @@ on:
   schedule:
     - cron: "*/15 * * * *"   # heartbeat: inbox, calendar, reminders
     - cron: "7 * * * *"      # web monitor, hourly
+    - cron: "20 10 * * *"    # Turok: Turo demand scan + prices, 06:20 Toronto (EDT)
     - cron: "0 11 * * *"     # daily brief 07:00 Toronto (EDT); 06:00 in winter
     - cron: "30 12 * * 0"    # weekly health review + memory compaction, Sunday morning
   push:
@@ -15,7 +16,7 @@ on:
   workflow_dispatch:
     inputs:
       cycles:
-        description: "Space-separated cycles (heartbeat, web-monitor, daily-brief, health-review, compact-memory, dashboard)"
+        description: "Space-separated cycles (heartbeat, web-monitor, daily-brief, health-review, compact-memory, turok, turok-pricing, dashboard)"
         default: "heartbeat"
 
 concurrency:
@@ -56,6 +57,7 @@ jobs:
               case "$SCHEDULE" in
                 "*/15 * * * *") CYCLES="heartbeat" ;;
                 "7 * * * *")    CYCLES="web-monitor" ;;
+                "20 10 * * *")  CYCLES="turok-pricing" ;;
                 "0 11 * * *")   CYCLES="heartbeat daily-brief" ;;
                 "30 12 * * 0")  CYCLES="health-review compact-memory" ;;
                 *)              CYCLES="heartbeat" ;;

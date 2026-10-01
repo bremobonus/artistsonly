@@ -13,6 +13,8 @@ import {
 } from "./lib/brain.js";
 import { emailConfigured, sendMail } from "./integrations/notify.js";
 import { calendarInsert, googleConfigured } from "./integrations/google.js";
+import { push } from "./integrations/notify.js";
+import { firstName, loadTuro, markAction, queueAction, saveTuro, tripLink, vehicleName } from "./lib/turo.js";
 
 /** Tools Akira can call while reasoning. Every write goes through the journal. */
 export function akiraTools(cycle: string) {
@@ -221,4 +223,168 @@ export function akiraTools(cycle: string) {
   });
 
   return { remember, notePerson, setReminder, addCalendarEvent, draftEmail, sendEmail, setPriorities, logDecision, healthFlag, recordMention };
+}
+
+/** Turok's tools: Amos's Turo fleet, trips, guest messages and the Turo outbox. Every write is journaled. */
+export function turokTools(cycle: string) {
+  const upsertVehicle = betaZodTool({
+    name: "turo_upsert_vehicle",
+    description: "Add or update a car in Amos's Turo fleet. Use a stable id slug like 'tesla-model-3-white'. Only set fields you actually observed.",
+    inputSchema: z.object({
+      id: z.string(),
+      name: z.string().describe("e.g. '2022 Tesla Model 3'"),
+      plate: z.string().optional(),
+      listingUrl: z.string().optional(),
+      pickup: z.string().optional(),
+      checkin: z.string().optional(),
+      basePrice: z.number().optional(),
+      minPrice: z.number().optional(),
+      maxPrice: z.number().optional(),
+      active: z.boolean().optional(),
+      notes: z.string().optional(),
+      source: z.string(),
+    }),
+    run: async (i) => {
+      const s = loadTuro();
+      const prev = s.vehicles.find((v) => v.id === i.id);
+      const defined = Object.fromEntries(Object.entries(i).filter(([, v]) => v !== undefined));
+      const v = { active: true, ...prev, ...defined, updatedAt: nowIso() } as (typeof s.vehicles)[number];
+      s.vehicles = [...s.vehicles.filter((x) => x.id !== i.id), v];
+      saveTuro(s);
+      journal({ kind: "fact", source: i.source, summary: `Turo vehicle ${prev ? "updated" : "added"}: ${i.name} (${i.id})`, tags: [cycle, "turok", "turo", "vehicle"], data: defined });
+      return `vehicle ${i.id} ${prev ? "updated" : "added"}`;
+    },
+  });
+
+  const upsertTrip = betaZodTool({
+    name: "turo_upsert_trip",
+    description: "Record or update a Turo trip (request, booking, change, cancellation). Use Turo's reservation number as id when present. Times ISO-8601 with offset.",
+    inputSchema: z.object({
+      id: z.string().describe("Turo reservation id, or a stable slug if none"),
+      vehicleId: z.string().optional(),
+      guest: z.string(),
+      start: z.string(),
+      end: z.string(),
+      status: z.enum(["requested", "booked", "in_progress", "completed", "cancelled", "declined"]),
+      total: z.number().optional().describe("Host earnings or trip total as stated in the email"),
+      pickup: z.string().optional(),
+      reservationUrl: z.string().optional(),
+      notes: z.string().optional(),
+      source: z.string(),
+    }),
+    run: async (i) => {
+      const s = loadTuro();
+      const prev = s.trips.find((t) => t.id === i.id);
+      const defined = Object.fromEntries(Object.entries(i).filter(([, v]) => v !== undefined));
+      const t = { createdAt: nowIso(), lifecycle: {}, ...prev, ...defined, updatedAt: nowIso() } as (typeof s.trips)[number];
+      // A changed time re-arms the time-based steps so the guest gets correct details.
+      if (prev && (prev.start !== i.start || prev.end !== i.end)) t.lifecycle = { booked: prev.lifecycle.booked ?? nowIso() };
+      s.trips = [...s.trips.filter((x) => x.id !== i.id), t].sort((a, b) => a.start.localeCompare(b.start));
+      saveTuro(s);
+      journal({ kind: "event", source: i.source, summary: `Turo trip ${i.id} ${prev ? `${prev.status} -> ${i.status}` : i.status}: ${i.guest}, ${vehicleName(s, i.vehicleId)}, ${i.start} to ${i.end}${i.total ? `, $${i.total}` : ""}`, tags: [cycle, "turok", "turo", "trip", i.status], refs: [i.id], data: defined });
+      return `trip ${i.id} saved (${i.status})`;
+    },
+  });
+
+  const logGuestMessage = betaZodTool({
+    name: "turo_log_message",
+    description: "Record a message a guest sent on Turo (from a Turo notification email), verbatim.",
+    inputSchema: z.object({ guest: z.string(), text: z.string(), ts: z.string(), tripId: z.string().optional(), source: z.string() }),
+    run: async (i) => {
+      const s = loadTuro();
+      if (s.messages.some((m) => m.source === i.source && m.text === i.text)) return "already logged";
+      const id = newId("tmsg");
+      s.messages.push({ id, ts: i.ts, tripId: i.tripId, guest: i.guest, direction: "in", text: i.text, source: i.source });
+      s.messages = s.messages.slice(-2000);
+      saveTuro(s);
+      journal({ kind: "event", source: i.source, summary: `Turo message from ${i.guest}${i.tripId ? ` (trip ${i.tripId})` : ""}: ${i.text}`, tags: [cycle, "turok", "turo", "guest-message"], refs: [id], ts: i.ts });
+      return `logged ${id}`;
+    },
+  });
+
+  const reply = betaZodTool({
+    name: "turo_reply",
+    description:
+      "Reply to a guest on Turo in Amos's voice. Queues the exact text in the Turo outbox and pushes it to Amos to paste. If a needed fact is missing, send a short holding reply and put what is missing in `needs`.",
+    inputSchema: z.object({
+      guest: z.string(),
+      text: z.string(),
+      why: z.string(),
+      tripId: z.string().optional(),
+      needs: z.string().optional(),
+      urgent: z.boolean().default(false).describe("Safety, accident, lockout, guest waiting at the car"),
+      source: z.string(),
+    }),
+    run: async (i) => {
+      const s = loadTuro();
+      const trip = s.trips.find((t) => t.id === i.tripId);
+      const a = queueAction(s, { kind: "message", title: `Reply to ${firstName(i.guest)}`, body: i.text, why: i.why, tripId: i.tripId, vehicleId: trip?.vehicleId, guest: i.guest, link: tripLink(s, trip), needs: i.needs, source: i.source });
+      saveTuro(s);
+      await push(`Turok → ${firstName(i.guest)}${i.needs ? " (needs info)" : ""}`, `${i.text}\n\n${i.needs ? `Missing: ${i.needs}\n` : ""}${a.link}`, i.urgent ? 5 : 4);
+      return `queued ${a.id}`;
+    },
+  });
+
+  const queue = betaZodTool({
+    name: "turo_queue_action",
+    description: "Queue any other Turo action for Amos to apply: accept or decline a request, file a damage/toll/fuel claim, leave a guest review, change a listing.",
+    inputSchema: z.object({
+      kind: z.enum(["accept", "decline", "claim", "review", "listing", "other"]),
+      title: z.string(),
+      body: z.string().describe("Exact text / steps, ready to paste"),
+      why: z.string(),
+      tripId: z.string().optional(),
+      vehicleId: z.string().optional(),
+      guest: z.string().optional(),
+      priority: z.enum(["normal", "high", "urgent"]).default("normal"),
+      source: z.string(),
+    }),
+    run: async (i) => {
+      const s = loadTuro();
+      const trip = s.trips.find((t) => t.id === i.tripId);
+      const { priority, ...rest } = i;
+      const a = queueAction(s, { ...rest, link: tripLink(s, trip) });
+      saveTuro(s);
+      await push(`Turok: ${i.title}`, `${i.body}\n\nWhy: ${i.why}\n${a.link}`, priority === "urgent" ? 5 : priority === "high" ? 4 : 3);
+      return `queued ${a.id}`;
+    },
+  });
+
+  const mark = betaZodTool({
+    name: "turo_mark_action",
+    description: "Mark a Turo outbox action done or skipped when Amos says he applied (or rejected) it.",
+    inputSchema: z.object({ id: z.string(), status: z.enum(["done", "skipped"]), source: z.string() }),
+    run: async (i) => {
+      const s = loadTuro();
+      const a = markAction(s, i.id, i.status, i.source);
+      if (!a) return `no action ${i.id}`;
+      saveTuro(s);
+      return `${i.id} ${i.status}`;
+    },
+  });
+
+  const demand = betaZodTool({
+    name: "turo_add_demand_event",
+    description: "Record a local event or holiday that moves rental demand (concert, festival, sports final, long weekend). Prices on those dates are multiplied.",
+    inputSchema: z.object({
+      name: z.string(),
+      start: z.string().describe("YYYY-MM-DD"),
+      end: z.string().describe("YYYY-MM-DD, inclusive"),
+      multiplier: z.number().min(0.5).max(2),
+      area: z.string().optional(),
+      source: z.string().describe("URL or where this came from"),
+    }),
+    run: async (i) => {
+      const s = loadTuro();
+      if (s.demandEvents.some((e) => e.name === i.name && e.start === i.start)) return "already known";
+      const id = newId("tdem");
+      s.demandEvents.push({ id, ...i });
+      s.demandEvents = s.demandEvents.filter((e) => e.end >= new Date(Date.now() - 86400_000).toISOString().slice(0, 10));
+      saveTuro(s);
+      journal({ kind: "fact", source: i.source, summary: `Turo demand: ${i.name} ${i.start}..${i.end} ×${i.multiplier}${i.area ? ` (${i.area})` : ""}`, tags: [cycle, "turok", "turo", "pricing"], refs: [id] });
+      return `demand ${id}`;
+    },
+  });
+
+  return { upsertVehicle, upsertTrip, logGuestMessage, reply, queue, mark, demand };
 }

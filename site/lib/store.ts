@@ -64,7 +64,7 @@ async function commitFile(rel: string, content: Buffer, message: string): Promis
   return { ok: res.ok, status: res.status, detail: res.ok ? undefined : (await res.text()).slice(0, 300) };
 }
 
-const SOURCES: IngestSource[] = ["apple_health", "device", "conversation", "email", "note", "document", "calendar", "web", "location", "system"];
+const SOURCES: IngestSource[] = ["apple_health", "device", "conversation", "email", "note", "document", "calendar", "web", "location", "turo", "system"];
 
 export function normaliseEvent(input: unknown, defaults: Partial<IngestEvent> = {}): IngestEvent | null {
   if (!input || typeof input !== "object") return null;

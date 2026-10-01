@@ -10,6 +10,7 @@ export type IngestSource =
   | "calendar"
   | "web"
   | "location"
+  | "turo"
   | "system";
 
 export interface IngestEvent {
@@ -155,6 +156,118 @@ export interface ActivityItem {
   detail: string;
 }
 
+// ---------- Turok (Turo agent) ----------
+
+export interface TuroVehicle {
+  id: string;
+  name: string;
+  plate?: string;
+  listingUrl?: string;
+  /** Pickup / return spot as told to guests. */
+  pickup?: string;
+  /** Check-in instructions sent before each trip (lockbox, parking, keys). */
+  checkin?: string;
+  /** Daily prices in config currency. Pricing is skipped until basePrice is known. */
+  basePrice?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  active: boolean;
+  notes?: string;
+  source: string;
+  updatedAt: string;
+}
+
+export type TuroTripStatus = "requested" | "booked" | "in_progress" | "completed" | "cancelled" | "declined";
+
+export interface TuroTrip {
+  id: string;
+  vehicleId?: string;
+  guest: string;
+  start: string;
+  end: string;
+  status: TuroTripStatus;
+  total?: number;
+  pickup?: string;
+  reservationUrl?: string;
+  notes?: string;
+  source: string;
+  createdAt: string;
+  updatedAt: string;
+  /** Lifecycle steps already done for this trip (key -> ISO ts), so nothing fires twice. */
+  lifecycle: Record<string, string>;
+}
+
+export interface TuroMessage {
+  id: string;
+  ts: string;
+  tripId?: string;
+  guest: string;
+  direction: "in" | "out";
+  text: string;
+  source: string;
+}
+
+export interface TuroAction {
+  id: string;
+  createdAt: string;
+  kind: "message" | "set_price" | "accept" | "decline" | "claim" | "review" | "listing" | "other";
+  title: string;
+  /** Exact text to paste / prices to set. */
+  body: string;
+  why: string;
+  tripId?: string;
+  vehicleId?: string;
+  guest?: string;
+  link?: string;
+  /** Facts Turok did not have (the reply was sent as a holding message). */
+  needs?: string;
+  status: "queued" | "done" | "skipped" | "superseded";
+  doneAt?: string;
+  source: string;
+  data?: unknown;
+}
+
+export interface TuroPriceDay {
+  date: string;
+  price: number;
+  booked: boolean;
+  reasons: string[];
+}
+
+export interface TuroDemandEvent {
+  id: string;
+  name: string;
+  start: string;
+  end: string;
+  /** Multiplier applied to prices on those dates, e.g. 1.25. */
+  multiplier: number;
+  area?: string;
+  source: string;
+}
+
+export interface TuroState {
+  vehicles: TuroVehicle[];
+  trips: TuroTrip[];
+  messages: TuroMessage[];
+  outbox: TuroAction[];
+  prices: Record<string, TuroPriceDay[]>;
+  /** Prices Amos confirmed he set in Turo, per vehicle per date. */
+  applied: Record<string, Record<string, number>>;
+  demandEvents: TuroDemandEvent[];
+  lastPricingAt?: string;
+  updatedAt: string;
+}
+
+export interface TuroDashboard {
+  vehicles: TuroVehicle[];
+  trips: TuroTrip[];
+  outbox: TuroAction[];
+  messages: TuroMessage[];
+  prices: Record<string, TuroPriceDay[]>;
+  lastPricingAt?: string;
+  currency: string;
+}
+
 export interface Dashboard {
   generatedAt: string;
   assistant: { name: string; email: string; version: string; status: "online" | "degraded" };
@@ -180,4 +293,5 @@ export interface Dashboard {
   journalRecent: JournalEntry[];
   activity: ActivityItem[];
   memoryExcerpt: string;
+  turo?: TuroDashboard;
 }

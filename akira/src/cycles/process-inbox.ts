@@ -3,8 +3,10 @@ import path from "node:path";
 import { PATHS } from "../config.js";
 import { activity, archiveRaw, identity, journal, listInbox, nowIso, state, storeDocument } from "../lib/brain.js";
 import { runAgent } from "../lib/claude.js";
-import { akiraTools } from "../tools.js";
+import { akiraTools, turokTools } from "../tools.js";
 import type { HealthDaily, IngestEvent } from "../lib/types.js";
+import { isTuroEmail, loadTuro } from "../lib/turo.js";
+import { applyTuroResults, turokDigest } from "./turok.js";
 
 /** Deterministic handlers for high-volume telemetry; everything else goes to the model. */
 function handleDevice(ev: IngestEvent): void {
@@ -113,6 +115,7 @@ export async function processInbox(): Promise<void> {
     return;
   }
   const forModel: IngestEvent[] = [];
+  const forTurok: IngestEvent[] = [];
   let telemetry = 0;
   for (const { file, event } of items) {
     try {
@@ -126,6 +129,9 @@ export async function processInbox(): Promise<void> {
       } else if (event.source === "location") {
         handleDevice({ ...event, source: "device", payload: { summary: `location: ${JSON.stringify(event.payload)}` } });
         telemetry++;
+      } else if (event.source === "turo" || (event.source === "email" && isTuroEmail((event.payload as { from?: string } | undefined)?.from))) {
+        // Turo mail and Turo events belong to Turok, Akira's Turo agent.
+        forTurok.push(event);
       } else if (event.source === "document") {
         handleDocument(event);
         forModel.push(event);
@@ -140,6 +146,15 @@ export async function processInbox(): Promise<void> {
     }
   }
   activity("process-inbox", "telemetry", `${telemetry} device/health events applied`);
+
+  if (forTurok.length) {
+    try {
+      await turokDigest(applyTuroResults(forTurok));
+    } catch (e) {
+      activity("turok", "failed", (e as Error).message.slice(0, 300));
+      journal({ kind: "system", source: "turok", summary: `Turok failed to read ${forTurok.length} Turo event(s) (raw events are archived): ${(e as Error).message.slice(0, 300)}`, refs: forTurok.map((x) => x.id), tags: ["turok", "error"] });
+    }
+  }
 
   if (!forModel.length) return;
   if (!(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN)) {
@@ -164,6 +179,7 @@ export async function processInbox(): Promise<void> {
   if (cur.length) batches.push(cur);
 
   const t = akiraTools("process-inbox");
+  const openTuro = loadTuro().outbox.filter((a) => a.status === "queued").map((a) => ({ id: a.id, kind: a.kind, title: a.title }));
   for (const batch of batches) {
     const { text } = await runAgent({
       cycle: "process-inbox",
@@ -172,10 +188,11 @@ export async function processInbox(): Promise<void> {
         "For each event: extract every date, deadline, commitment (made or owed), person, decision, money amount, and fact worth keeping.",
         "Use the tools: remember, note_person, set_reminder, add_calendar_event, send_email (when a reply or outreach is clearly needed and you have the facts), draft_email (when you lack a fact only Amos knows), log_decision (whenever you make a call on Amos's behalf). Never ask Amos; decide and log.",
         "Be exhaustive. Nothing in these events may be lost. Prefer several small tool calls over one vague one.",
+        "If Amos says he applied or rejected a Turo action (Turok's outbox below), call turo_mark_action with its id.",
         "Finish with a 2-5 line plain summary of what you learned.",
       ].join("\n"),
-      userContent: "## New events\n```json\n" + JSON.stringify(batch, null, 1) + "\n```",
-      tools: [t.remember, t.notePerson, t.setReminder, t.addCalendarEvent, t.sendEmail, t.draftEmail, t.logDecision],
+      userContent: "## New events\n```json\n" + JSON.stringify(batch, null, 1) + "\n```\n\n## Turok's open Turo actions\n" + JSON.stringify(openTuro),
+      tools: [t.remember, t.notePerson, t.setReminder, t.addCalendarEvent, t.sendEmail, t.draftEmail, t.logDecision, turokTools("process-inbox").mark],
       maxIterations: 40,
     });
     journal({ kind: "system", source: "process-inbox", summary: `Digested ${batch.length} event(s): ${text.slice(0, 800)}`, refs: batch.map((e) => e.id), tags: ["digest"] });

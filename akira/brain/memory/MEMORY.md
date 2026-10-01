@@ -31,3 +31,6 @@ _(see `projects/`)_
 ## Open loops
 - [x] identity.json filled from Amos's page answers 2026-09-28 (his own email addresses still unknown; ntfy topic unknown).
 - [x] Amos ticked Mac agent, phone, email routing, Vercel, secrets as done on 2026-09-28 (unverified until data arrives).
+
+## Turo
+- 2026-10-01: Amos hosts on Turo. His Turo agent is called Turok (Akira's specialist); Turok sets prices, messages guests, tracks trips and claims; actions are queued for Amos to apply in Turo. Car details and base prices still unknown. _(src: j_muq3f5ek_e8cfcc)_

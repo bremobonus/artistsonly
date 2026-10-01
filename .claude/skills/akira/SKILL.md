@@ -33,6 +33,14 @@ description: Operate, extend or debug Akira, Amos's always-on AI chief of staff 
 - New cycle → `akira/src/cycles/<name>.ts`, register in `index.ts`, add a cron line and a `case` in `akira.yml`, add it to `SCHEDULE` in `dashboard.ts`.
 - New dashboard panel → extend `Dashboard` in `types.ts`, `buildDashboard()`, and `site/app/akira/ops-room.tsx`.
 
+## Turok (Turo agent)
+- Persona `akira/TUROK.md`; policy `akira/brain/turo/config.json`; state `akira/brain/state/turo.json`.
+- Code: `akira/src/lib/turo.ts` (pricing engine, lifecycle, outbox, pure + tested), `akira/src/cycles/turok.ts`
+  (`turokDigest` for Turo emails, `turokTick` every heartbeat, `turokPricing` daily), tools in `turokTools()` in `tools.ts`.
+- Turo email (`*@turo.com`) and `source=turo` events are routed to Turok in `process-inbox.ts`.
+- Outbound Turo actions are queued, never claimed as done until marked done (dashboard button, ingest `action-result`, or Amos telling Akira).
+- Test: `npm test` (`test/turok.test.ts`); run: `AKIRA_ROOT=<tmp> AKIRA_DRY_RUN=1 npx tsx src/index.ts turok`.
+
 ## Debug
 - Cycle failures are journaled with `tags: ["error"]` and shown in the Activity panel.
 - `AKIRA_ROOT=/tmp/copy AKIRA_DRY_RUN=1 npx tsx src/index.ts heartbeat` runs against a copy.
