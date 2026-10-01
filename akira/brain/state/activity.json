@@ -1,6 +1,30 @@
 {
   "items": [
     {
+      "ts": "2026-10-01T06:18:21.647Z",
+      "cycle": "heartbeat",
+      "action": "ok",
+      "detail": "3 ms"
+    },
+    {
+      "ts": "2026-10-01T06:18:21.647Z",
+      "cycle": "reminders",
+      "action": "checked",
+      "detail": "0 fired, 0 open"
+    },
+    {
+      "ts": "2026-10-01T06:18:21.646Z",
+      "cycle": "process-inbox",
+      "action": "idle",
+      "detail": "inbox empty"
+    },
+    {
+      "ts": "2026-10-01T06:18:21.645Z",
+      "cycle": "calendar-sync",
+      "action": "synced",
+      "detail": "0 imported from 0 feed(s), 0 Akira-owned"
+    },
+    {
       "ts": "2026-10-01T02:00:19.259Z",
       "cycle": "web-monitor",
       "action": "failed",
