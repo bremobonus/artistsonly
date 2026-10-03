@@ -1,6 +1,36 @@
 {
   "items": [
     {
+      "ts": "2026-10-03T09:26:03.248Z",
+      "cycle": "heartbeat",
+      "action": "ok",
+      "detail": "7 ms"
+    },
+    {
+      "ts": "2026-10-03T09:26:03.247Z",
+      "cycle": "reminders",
+      "action": "checked",
+      "detail": "0 fired, 0 open"
+    },
+    {
+      "ts": "2026-10-03T09:26:03.246Z",
+      "cycle": "process-inbox",
+      "action": "idle",
+      "detail": "inbox empty"
+    },
+    {
+      "ts": "2026-10-03T09:26:03.242Z",
+      "cycle": "gmail-sync",
+      "action": "skipped",
+      "detail": "Google not configured (GOOGLE_CLIENT_ID/SECRET/REFRESH_TOKEN)"
+    },
+    {
+      "ts": "2026-10-03T09:26:03.241Z",
+      "cycle": "calendar-sync",
+      "action": "synced",
+      "detail": "0 imported from 0 feed(s), 0 Akira-owned"
+    },
+    {
       "ts": "2026-10-03T06:21:02.453Z",
       "cycle": "web-monitor",
       "action": "skipped",
