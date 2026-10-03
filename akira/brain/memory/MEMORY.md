@@ -31,3 +31,4 @@ _(see `projects/`)_
 ## Open loops
 - [x] identity.json filled from Amos's page answers 2026-09-28 (his own email addresses still unknown; ntfy topic unknown).
 - [x] Amos ticked Mac agent, phone, email routing, Vercel, secrets as done on 2026-09-28 (unverified until data arrives).
+- [ ] Tesla Model 3 (Pearl White, Premium RWD): Scotiabank financing approved via Tesla. $49,815.18 over 96 mo at 4.99%, $630.42/mo, $250 deposit paid. Amos can't find the approval. Get the Scotiabank (Scotia Dealer Advantage) approval or contract in writing before the 30–60 day validity runs out. _(src: journal j_muselyj8_f9f2b8, 2026-10-03)_
