@@ -82,6 +82,9 @@ jobs:
           GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
           CLEANUP_GMAIL_ADDRESS: ${{ secrets.CLEANUP_GMAIL_ADDRESS }}
           CLEANUP_GMAIL_APP_PASSWORD: ${{ secrets.CLEANUP_GMAIL_APP_PASSWORD }}
+          CLEANUP_GOOGLE_REFRESH_TOKEN: ${{ secrets.CLEANUP_GOOGLE_REFRESH_TOKEN }}
+          CLEANUP_GOOGLE_CLIENT_ID: ${{ secrets.CLEANUP_GOOGLE_CLIENT_ID }}
+          CLEANUP_GOOGLE_CLIENT_SECRET: ${{ secrets.CLEANUP_GOOGLE_CLIENT_SECRET }}
           CLEANUP_KEEP: ${{ vars.CLEANUP_KEEP }}
         run: npx tsx src/index.ts ${{ steps.plan.outputs.cycles }} || echo "::warning::one or more cycles failed; state still committed"
 

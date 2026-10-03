@@ -4,9 +4,16 @@
  *   GOOGLE_CLIENT_ID=... GOOGLE_CLIENT_SECRET=... npm run google-auth
  * Opens a consent URL; after approval prints GOOGLE_REFRESH_TOKEN to store as a GitHub Actions secret.
  * Scopes: Gmail read-only, Calendar events. Nothing else.
+ *
+ * Inbox-cleanup account (e.g. cosbymonica@gmail.com): `npm run google-auth -- --mail`, sign in AS that account.
+ * Requests full mail access (IMAP/SMTP) and prints CLEANUP_GOOGLE_REFRESH_TOKEN instead.
  */
 import http from "node:http";
-import { GOOGLE_SCOPES } from "./integrations/google.js";
+import { GOOGLE_MAIL_SCOPES, GOOGLE_SCOPES } from "./integrations/google.js";
+
+const mail = process.argv.includes("--mail");
+const scopes = mail ? GOOGLE_MAIL_SCOPES : GOOGLE_SCOPES;
+const tokenName = mail ? "CLEANUP_GOOGLE_REFRESH_TOKEN" : "GOOGLE_REFRESH_TOKEN";
 
 const id = process.env.GOOGLE_CLIENT_ID;
 const secret = process.env.GOOGLE_CLIENT_SECRET;
@@ -17,7 +24,7 @@ if (!id || !secret) {
 const port = 8765;
 const redirect = `http://127.0.0.1:${port}/callback`;
 const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-url.search = new URLSearchParams({ client_id: id, redirect_uri: redirect, response_type: "code", access_type: "offline", prompt: "consent", scope: GOOGLE_SCOPES.join(" ") }).toString();
+url.search = new URLSearchParams({ client_id: id, redirect_uri: redirect, response_type: "code", access_type: "offline", prompt: "consent", scope: scopes.join(" ") }).toString();
 
 const server = http.createServer(async (req, res) => {
   const u = new URL(req.url ?? "/", redirect);
@@ -33,7 +40,7 @@ const server = http.createServer(async (req, res) => {
     process.exit(1);
   }
   res.end("Akira is connected. You can close this tab.");
-  console.log("\nGOOGLE_REFRESH_TOKEN=" + j.refresh_token + "\n\nAdd it (with GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET) as GitHub Actions secrets.");
+  console.log(`\n${tokenName}=` + j.refresh_token + "\n\nAdd it (with GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET) as GitHub Actions secrets.");
   server.close();
 });
 server.listen(port, "127.0.0.1", () => {
