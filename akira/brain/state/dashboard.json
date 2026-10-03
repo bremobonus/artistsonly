@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-03T00:22:49.054Z",
+  "generatedAt": "2026-10-03T03:31:38.544Z",
   "assistant": {
     "name": "Akira",
     "email": "akira@artistsonly.io",
@@ -12,10 +12,10 @@
   },
   "now": {
     "lastCycle": {
-      "ts": "2026-10-03T00:22:49.051Z",
-      "cycle": "web-monitor",
-      "action": "skipped",
-      "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
+      "ts": "2026-10-03T03:31:38.543Z",
+      "cycle": "heartbeat",
+      "action": "ok",
+      "detail": "10 ms"
     },
     "nextCycles": [
       {
@@ -373,6 +373,36 @@
   ],
   "activity": [
     {
+      "ts": "2026-10-03T03:31:38.543Z",
+      "cycle": "heartbeat",
+      "action": "ok",
+      "detail": "10 ms"
+    },
+    {
+      "ts": "2026-10-03T03:31:38.542Z",
+      "cycle": "reminders",
+      "action": "checked",
+      "detail": "0 fired, 0 open"
+    },
+    {
+      "ts": "2026-10-03T03:31:38.537Z",
+      "cycle": "process-inbox",
+      "action": "idle",
+      "detail": "inbox empty"
+    },
+    {
+      "ts": "2026-10-03T03:31:38.536Z",
+      "cycle": "gmail-sync",
+      "action": "skipped",
+      "detail": "Google not configured (GOOGLE_CLIENT_ID/SECRET/REFRESH_TOKEN)"
+    },
+    {
+      "ts": "2026-10-03T03:31:38.534Z",
+      "cycle": "calendar-sync",
+      "action": "synced",
+      "detail": "0 imported from 0 feed(s), 0 Akira-owned"
+    },
+    {
       "ts": "2026-10-03T00:22:49.051Z",
       "cycle": "web-monitor",
       "action": "skipped",
@@ -698,36 +728,6 @@
     },
     {
       "ts": "2026-10-01T13:41:33.517Z",
-      "cycle": "reminders",
-      "action": "checked",
-      "detail": "0 fired, 0 open"
-    },
-    {
-      "ts": "2026-10-01T13:41:33.508Z",
-      "cycle": "process-inbox",
-      "action": "idle",
-      "detail": "inbox empty"
-    },
-    {
-      "ts": "2026-10-01T13:41:33.507Z",
-      "cycle": "calendar-sync",
-      "action": "synced",
-      "detail": "0 imported from 0 feed(s), 0 Akira-owned"
-    },
-    {
-      "ts": "2026-10-01T08:43:28.663Z",
-      "cycle": "web-monitor",
-      "action": "failed",
-      "detail": "Error: Could not resolve authentication method. Expected one of apiKey, authToken, credentials, config, or profile to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted\n    at Anthropic.validateHeaders (/home/runner/work/artistsonly/artistsonly/akira/node_modules/@anthropic-ai/sdk/src/client.ts:915:11)\n    at Anthropic.buildHeaders (/home/runner/work/artistsonly/artistsonly/akira/node_modules/@anthropic-ai/sdk/src/client.ts:1588:10)\n    at async Anthropic.b"
-    },
-    {
-      "ts": "2026-10-01T06:18:21.647Z",
-      "cycle": "heartbeat",
-      "action": "ok",
-      "detail": "3 ms"
-    },
-    {
-      "ts": "2026-10-01T06:18:21.647Z",
       "cycle": "reminders",
       "action": "checked",
       "detail": "0 fired, 0 open"
