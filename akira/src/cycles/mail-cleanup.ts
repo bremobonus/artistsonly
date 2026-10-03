@@ -2,16 +2,21 @@ import path from "node:path";
 import { ImapFlow } from "imapflow";
 import nodemailer from "nodemailer";
 import { BRAIN, ENV, PATHS } from "../config.js";
+import { accessToken } from "../integrations/google.js";
 import { activity, appendLine, journal, nowIso, readJson, writeJson } from "../lib/brain.js";
 import { groupBulkSenders, parseHeaderBlock, parseMailto, type HeaderMessage, type SenderGroup } from "../lib/unsubscribe.js";
 
 /**
- * Inbox cleanup for a Gmail account wired with an app password (IMAP + SMTP, no OAuth).
+ * Inbox cleanup for a second Gmail account over IMAP + SMTP, signed in either by Google OAuth (preferred) or an
+ * app password (only offered by Google on some accounts).
  * Finds bulk mail (anything carrying a List-Unsubscribe header), unsubscribes once per sender, then archives
  * those messages out of the Inbox under the label "Akira/Unsubscribed". Nothing is ever deleted or trashed:
  * every message stays in All Mail, and every action is appended to memory/raw/mail-cleanup/<account>.jsonl.
  *
- * Env: CLEANUP_GMAIL_ADDRESS, CLEANUP_GMAIL_APP_PASSWORD (16-char Google app password),
+ * Env: CLEANUP_GMAIL_ADDRESS plus either
+ *        CLEANUP_GOOGLE_REFRESH_TOKEN (scope https://mail.google.com/, from `npm run google-auth -- --mail` or the
+ *        OAuth Playground; client from CLEANUP_GOOGLE_CLIENT_ID/SECRET, else GOOGLE_CLIENT_ID/SECRET), or
+ *        CLEANUP_GMAIL_APP_PASSWORD (16-char Google app password);
  *      CLEANUP_KEEP (comma list of domains/addresses never touched), CLEANUP_MAX_UNSUBSCRIBES (per run, default 150),
  *      CLEANUP_SCAN_LIMIT (newest Inbox messages scanned, default 20000). AKIRA_DRY_RUN=1 → report only.
  */
@@ -42,8 +47,15 @@ interface CleanupState {
   lastSummary: string;
 }
 
+function oauthCreds() {
+  const clientId = process.env.CLEANUP_GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.CLEANUP_GOOGLE_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
+  const refreshToken = process.env.CLEANUP_GOOGLE_REFRESH_TOKEN;
+  return clientId && clientSecret && refreshToken ? { clientId, clientSecret, refreshToken } : undefined;
+}
+
 export function cleanupConfigured(): boolean {
-  return !!(process.env.CLEANUP_GMAIL_ADDRESS && process.env.CLEANUP_GMAIL_APP_PASSWORD);
+  return !!(process.env.CLEANUP_GMAIL_ADDRESS && (oauthCreds() || process.env.CLEANUP_GMAIL_APP_PASSWORD));
 }
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -61,11 +73,10 @@ async function oneClick(url: string): Promise<void> {
 
 export async function mailCleanup(): Promise<void> {
   if (!cleanupConfigured()) {
-    activity("mail-cleanup", "skipped", "CLEANUP_GMAIL_ADDRESS / CLEANUP_GMAIL_APP_PASSWORD not set");
+    activity("mail-cleanup", "skipped", "CLEANUP_GMAIL_ADDRESS plus CLEANUP_GOOGLE_REFRESH_TOKEN (with a Google OAuth client) or CLEANUP_GMAIL_APP_PASSWORD not set");
     return;
   }
   const user = process.env.CLEANUP_GMAIL_ADDRESS!.trim();
-  const pass = process.env.CLEANUP_GMAIL_APP_PASSWORD!.replace(/\s+/g, "");
   const keep = (process.env.CLEANUP_KEEP ?? "").split(",").map((s) => s.trim()).filter(Boolean);
   const maxUnsub = Number(process.env.CLEANUP_MAX_UNSUBSCRIBES ?? 150);
   const scanLimit = Number(process.env.CLEANUP_SCAN_LIMIT ?? 20000);
@@ -76,8 +87,16 @@ export async function mailCleanup(): Promise<void> {
   const audit = (rec: Record<string, unknown>) => appendLine(auditFile, JSON.stringify({ ts: nowIso(), account: user, ...rec }));
   const st = readJson<CleanupState>(stateFile, { account: user, senders: {}, archivedTotal: 0, lastRun: "", lastSummary: "" });
 
-  const client = new ImapFlow({ host: "imap.gmail.com", port: 993, secure: true, auth: { user, pass }, logger: false });
-  const smtp = nodemailer.createTransport({ host: "smtp.gmail.com", port: 465, secure: true, auth: { user, pass } });
+  const creds = oauthCreds();
+  const token = creds ? await accessToken(creds) : undefined;
+  const pass = (process.env.CLEANUP_GMAIL_APP_PASSWORD ?? "").replace(/\s+/g, "");
+  const client = new ImapFlow({ host: "imap.gmail.com", port: 993, secure: true, auth: token ? { user, accessToken: token } : { user, pass }, logger: false });
+  const smtp = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: token ? { type: "OAuth2", user, accessToken: token } : { user, pass },
+  });
 
   await client.connect();
   let groups: SenderGroup[] = [];

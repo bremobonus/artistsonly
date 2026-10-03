@@ -5,27 +5,39 @@
  */
 import type { CalendarEvent } from "../lib/types.js";
 
+/** Full mail scope, needed for IMAP/SMTP over OAuth (XOAUTH2). Used only by the mail-cleanup account. */
+export const GOOGLE_MAIL_SCOPES = ["https://mail.google.com/"];
+
 export const GOOGLE_SCOPES = ["https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/calendar.events"];
 
 export function googleConfigured(): boolean {
   return !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN);
 }
 
-let cached: { token: string; exp: number } | undefined;
+const cache = new Map<string, { token: string; exp: number }>();
 
-export async function accessToken(): Promise<string> {
-  if (cached && cached.exp > Date.now() + 30_000) return cached.token;
+export interface GoogleCreds {
+  clientId: string;
+  clientSecret: string;
+  refreshToken: string;
+}
+
+/** Access token for the given credentials (defaults to Amos's GOOGLE_* secrets). Cached per refresh token. */
+export async function accessToken(creds?: GoogleCreds): Promise<string> {
+  const c = creds ?? { clientId: process.env.GOOGLE_CLIENT_ID!, clientSecret: process.env.GOOGLE_CLIENT_SECRET!, refreshToken: process.env.GOOGLE_REFRESH_TOKEN! };
+  const hit = cache.get(c.refreshToken);
+  if (hit && hit.exp > Date.now() + 30_000) return hit.token;
   const body = new URLSearchParams({
-    client_id: process.env.GOOGLE_CLIENT_ID!,
-    client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-    refresh_token: process.env.GOOGLE_REFRESH_TOKEN!,
+    client_id: c.clientId,
+    client_secret: c.clientSecret,
+    refresh_token: c.refreshToken,
     grant_type: "refresh_token",
   });
   const res = await fetch("https://oauth2.googleapis.com/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body });
   if (!res.ok) throw new Error(`Google token refresh failed: ${res.status} ${(await res.text()).slice(0, 200)}`);
   const j = (await res.json()) as { access_token: string; expires_in: number };
-  cached = { token: j.access_token, exp: Date.now() + j.expires_in * 1000 };
-  return cached.token;
+  cache.set(c.refreshToken, { token: j.access_token, exp: Date.now() + j.expires_in * 1000 });
+  return j.access_token;
 }
 
 async function g<T>(url: string, init: RequestInit = {}): Promise<T> {
