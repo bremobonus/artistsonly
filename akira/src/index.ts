@@ -9,11 +9,13 @@ import { dailyBrief } from "./cycles/daily-brief.js";
 import { healthReview } from "./cycles/health.js";
 import { compactMemory } from "./cycles/compact-memory.js";
 import { gmailSync } from "./cycles/gmail-sync.js";
+import { mailCleanup } from "./cycles/mail-cleanup.js";
 
 const cycles: Record<string, () => Promise<void>> = {
   "calendar-sync": calendarSync,
   reminders: remindersDue,
   "gmail-sync": gmailSync,
+  "mail-cleanup": mailCleanup,
   "process-inbox": processInbox,
   "web-monitor": webMonitor,
   "daily-brief": dailyBrief,

@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       cycles:
-        description: "Space-separated cycles (heartbeat, web-monitor, daily-brief, health-review, compact-memory, dashboard)"
+        description: "Space-separated cycles (heartbeat, mail-cleanup, web-monitor, daily-brief, health-review, compact-memory, dashboard)"
         default: "heartbeat"
 
 concurrency:
@@ -56,7 +56,7 @@ jobs:
               case "$SCHEDULE" in
                 "*/15 * * * *") CYCLES="heartbeat" ;;
                 "7 * * * *")    CYCLES="web-monitor" ;;
-                "0 11 * * *")   CYCLES="heartbeat daily-brief" ;;
+                "0 11 * * *")   CYCLES="heartbeat mail-cleanup daily-brief" ;;
                 "30 12 * * 0")  CYCLES="health-review compact-memory" ;;
                 *)              CYCLES="heartbeat" ;;
               esac ;;
@@ -80,6 +80,9 @@ jobs:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          CLEANUP_GMAIL_ADDRESS: ${{ secrets.CLEANUP_GMAIL_ADDRESS }}
+          CLEANUP_GMAIL_APP_PASSWORD: ${{ secrets.CLEANUP_GMAIL_APP_PASSWORD }}
+          CLEANUP_KEEP: ${{ vars.CLEANUP_KEEP }}
         run: npx tsx src/index.ts ${{ steps.plan.outputs.cycles }} || echo "::warning::one or more cycles failed; state still committed"
 
       - name: Commit brain
