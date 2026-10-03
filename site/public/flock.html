@@ -68,7 +68,39 @@ form.cmd input{flex:1;background:none;border:0;color:var(--g);font:inherit;font-
 .chips button:hover{background:var(--g);color:#000}
 .hud{position:absolute;z-index:500;left:10px;bottom:24px;background:rgba(0,8,2,.85);border:1px solid var(--g3);padding:6px 9px;font-size:11px;color:var(--dim);pointer-events:none}
 .hud b{color:var(--g)}
-.mapwrap{position:relative;height:100%}
+.mapwrap{position:relative;height:100%;overflow:hidden}
+#globe{position:absolute;inset:0;z-index:400;background:radial-gradient(ellipse at 50% 45%,#03210c 0%,#010602 55%,#000 100%)}
+#globe canvas{outline:none}
+.mapwrap.street #globe{display:none}
+.mapwrap.globe #map,.mapwrap.globe .hud,.mapwrap.globe .wall{visibility:hidden}
+.modes{position:absolute;z-index:600;left:10px;top:10px;display:flex;border:1px solid var(--g3);background:rgba(0,8,2,.85)}
+.modes button{background:none;border:0;color:var(--dim);font:inherit;font-size:11px;letter-spacing:.12em;padding:6px 10px;cursor:pointer}
+.modes button[aria-pressed=true]{background:var(--g);color:#000}
+.target{position:absolute;z-index:600;left:10px;top:48px;width:min(300px,calc(100% - 20px));background:rgba(0,8,2,.88);border:1px solid var(--g3);padding:10px 12px;font-size:12px;line-height:1.6;display:none}
+.target.on{display:block}
+.target h3{margin:0 0 4px;font-size:15px;letter-spacing:.06em;text-shadow:0 0 6px var(--g2)}
+.target .meter{height:4px;background:var(--g3);margin:6px 0}
+.target .meter i{display:block;height:100%;background:var(--g);box-shadow:0 0 8px var(--g)}
+.target button{margin-top:8px;width:100%;background:var(--g);color:#000;border:0;font:inherit;font-weight:700;letter-spacing:.1em;padding:7px;cursor:pointer}
+.target button:hover{box-shadow:0 0 14px var(--g)}
+.target .x{position:absolute;right:6px;top:2px;width:auto;margin:0;background:none;color:var(--dim);padding:2px 6px}
+.leaflet-tooltip.ltip{background:none;border:0;box-shadow:none;padding:0}
+.leaflet-tooltip.ltip::before{display:none}
+.gtip{font-family:var(--mono);font-size:12px;background:rgba(0,8,2,.92);border:1px solid var(--g);color:var(--g);padding:6px 9px;line-height:1.5}
+.gtip b{font-size:13px}
+.gtip .r{color:#ff3355}
+.wall{position:absolute;z-index:500;left:0;right:0;bottom:0;display:none;gap:6px;overflow-x:auto;padding:8px 10px;background:linear-gradient(0deg,rgba(0,6,2,.95),rgba(0,6,2,.75));border-top:1px solid var(--g3)}
+.mapwrap.has-wall .wall{display:flex}
+.mapwrap.has-wall.street .hud,.mapwrap.has-wall.street .legend{bottom:96px}
+.tile{flex:0 0 150px;height:64px;border:1px solid var(--g3);background:#010a03;padding:5px 7px;font-size:10px;line-height:1.45;cursor:pointer;position:relative;overflow:hidden;text-align:left;color:var(--g);font-family:var(--mono)}
+.tile:hover,.tile:focus{border-color:var(--g);box-shadow:0 0 10px rgba(0,255,65,.4);outline:none}
+.tile b{display:block;font-size:11px}
+.tile span{color:var(--dim)}
+.tile::after{content:"";position:absolute;right:6px;top:6px;width:6px;height:6px;border-radius:50%;background:#ff3355;animation:pulse 2s infinite}
+.search{display:flex;margin-left:auto;border:1px solid var(--g3);background:#010a03}
+.search input{background:none;border:0;color:var(--g);font:inherit;padding:6px 8px;width:220px;outline:none}
+.search button{background:none;border:0;border-left:1px solid var(--g3);color:var(--g);font:inherit;padding:0 10px;cursor:pointer}
+@media (max-width:700px){.search{margin-left:0;width:100%}.search input{flex:1;width:auto}}
 .legend{position:absolute;z-index:500;right:10px;bottom:24px;background:rgba(0,8,2,.85);border:1px solid var(--g3);padding:6px 9px;font-size:11px;line-height:1.7}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:-1px}
 .cam-ico{width:10px;height:10px;border-radius:50%;background:var(--g);box-shadow:0 0 8px 2px var(--g);border:1px solid #bfffcf}
@@ -83,7 +115,7 @@ footer{position:relative;z-index:2;padding:6px 16px;color:var(--dim);font-size:1
   aside{max-height:320px;border-right:0;border-top:1px solid var(--line)}
   section.term{height:420px;border-left:0;border-top:1px solid var(--line)}
 }
-@media (max-width:600px){.kpi:last-child{grid-column:1/-1}.hud{display:none}.legend{left:10px;right:auto}}
+@media (max-width:600px){.kpi:last-child{grid-column:1/-1}.hud{display:none}.legend{display:none}}
 @media (prefers-reduced-motion:reduce){#rain{display:none}h1 .cur,.pulse{animation:none}}
 </style>
 </head>
@@ -94,6 +126,7 @@ footer{position:relative;z-index:2;padding:6px 16px;color:var(--dim);font-size:1
   <h1>&gt; FLOCK://GRID<span class="cur">_</span></h1>
   <span class="sub">license plate readers · united states · the 2026 backlash</span>
   <span class="sub" id="clock"></span>
+  <form class="search" id="search" role="search"><input id="q" placeholder="search a city, county, address…" aria-label="Search a place"><button aria-label="Search">⌕</button></form>
 </header>
 
 <div class="kpis" role="list">
@@ -111,11 +144,15 @@ footer{position:relative;z-index:2;padding:6px 16px;color:var(--dim);font-size:1
     <div id="idx"></div>
   </aside>
 
-  <div class="mapwrap">
-    <div id="map" role="application" aria-label="Map of Flock cameras"></div>
+  <div class="mapwrap globe" id="mapwrap">
+    <div id="map" role="application" aria-label="Street-level map of Flock cameras"></div>
+    <div id="globe" role="application" aria-label="Globe of US states shaded by camera count"></div>
+    <div class="modes" role="group" aria-label="View"><button id="m-globe" aria-pressed="true">◉ GLOBE</button><button id="m-street" aria-pressed="false">▦ STREET</button></div>
+    <div class="target" id="target" aria-live="polite"></div>
+    <div class="wall" id="wall" aria-label="Camera wall: nodes loaded in this view"></div>
     <div class="hud" id="hud">lat <b>--</b> lon <b>--</b> z <b>--</b></div>
     <div class="legend">
-      <div><span class="dot" style="background:#00ff41;box-shadow:0 0 6px #00ff41"></span>state density (DeFlock count)</div>
+      <div><span class="dot" style="background:#00ff41;box-shadow:0 0 6px #00ff41;border-radius:0"></span>state shaded by mapped cameras</div>
       <div><span class="dot" style="background:#bfffcf;box-shadow:0 0 6px #00ff41"></span>camera (live OpenStreetMap, zoom ≥ 11)</div>
       <div><span class="dot" style="background:#ff3355"></span>contract cancelled / paused</div>
     </div>
@@ -125,7 +162,7 @@ footer{position:relative;z-index:2;padding:6px 16px;color:var(--dim);font-size:1
     <div class="pane-h"><span>TERMINAL // flock@grid</span><span id="net">idle</span></div>
     <div id="log" aria-live="polite"></div>
     <div class="chips">
-      <button data-c="news">news</button><button data-c="scan">scan view</button><button data-c="near">near me</button>
+      <button data-c="globe">globe</button><button data-c="news">news</button><button data-c="scan">scan view</button><button data-c="near">near me</button>
       <button data-c="goto Atlanta">goto Atlanta</button><button data-c="top 10">top 10</button><button data-c="exits">exits</button><button data-c="help">help</button>
     </div>
     <form class="cmd" id="cmd" autocomplete="off"><label for="in">$</label><input id="in" placeholder="type help" spellcheck="false" aria-label="Command"></form>
@@ -138,6 +175,8 @@ footer{position:relative;z-index:2;padding:6px 16px;color:var(--dim);font-size:1
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/globe.gl@2.46.2/dist/globe.gl.min.js" crossorigin=""></script>
 <script>
 "use strict";
 /* ============================== data ============================== */
@@ -272,7 +311,8 @@ document.querySelectorAll("[data-count]").forEach(el => {
 });
 
 /* ============================== map ============================== */
-const map = L.map("map", { zoomControl: true, worldCopyJump: true, preferCanvas: true }).setView([38.5, -96], 4);
+const map = L.map("map", { zoomControl: false, worldCopyJump: true, preferCanvas: true }).setView([38.5, -96], 4);
+L.control.zoom({ position: "topright" }).addTo(map);
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · cameras: <a href="https://deflock.org">DeFlock</a>/OSM'
@@ -284,13 +324,37 @@ const camLayer = L.layerGroup().addTo(map);
 L.control.layers(null, { "state density": stateLayer, "contract exits": exitLayer, "live cameras (OSM)": camLayer }, { collapsed: true, position: "topright" }).addTo(map);
 
 const maxC = STATES[0][2];
-STATES.forEach(([name, ab, n, lat, lon]) => {
-  const r = 4 + Math.sqrt(n / maxC) * 38;
-  const m = L.circleMarker([lat, lon], { radius: r, color: "#00ff41", weight: 1, fillColor: "#00ff41", fillOpacity: .12 + .35 * n / maxC })
-    .bindPopup(`<b>${esc(name)}</b> [${ab}]<br>${fmt(n)} mapped ALPRs<br>${(100 * n / TOTAL).toFixed(1)}% of US total<br><span style="color:#4f8a5b">zoom in and run <code>scan</code> to pull live points</span>`)
-    .addTo(stateLayer);
-  m.on("click", () => print(`&gt; ${esc(name)}: ${fmt(n)} mapped cameras, rank #${STATES.findIndex(s => s[1] === ab) + 1}/${STATES.length}`, "", true));
-});
+const byName = Object.fromEntries(STATES.map(s => [s[0], s]));
+const byAb = Object.fromEntries(STATES.map(s => [s[1], s]));
+const rankOf = ab => STATES.findIndex(s => s[1] === ab) + 1;
+const heat = n => Math.sqrt(n / maxC);            // 0..1, sqrt so small states stay visible
+function stateTip(st) {
+  const ex = EXITS.filter(e => e[1] === st[1]);
+  return `<b>${esc(st[0])}</b> [${st[1]}]<br>${fmt(st[2])} mapped ALPRs · rank #${rankOf(st[1])}<br>${(100 * st[2] / TOTAL).toFixed(1)}% of US total` +
+    (ex.length ? `<br><span class="r">✕ ${ex.length} contract exit${ex.length > 1 ? "s" : ""}: ${ex.map(e => esc(e[0])).join(", ")}</span>` : "");
+}
+// US state shapes (us-atlas, Census cartographic boundaries) shared by the globe and the street map.
+let STATE_SHAPES = [];
+const stateLayers = {};
+const shapesReady = fetch("https://cdn.jsdelivr.net/npm/us-atlas@3.0.1/states-10m.json")
+  .then(r => r.json())
+  .then(topo => {
+    STATE_SHAPES = topojson.feature(topo, topo.objects.states).features
+      .map(f => { f.st = byName[f.properties.name]; return f; })
+      .filter(f => f.st);
+    L.geoJSON({ type: "FeatureCollection", features: STATE_SHAPES }, {
+      style: f => ({ color: "#00ff41", weight: 1, opacity: .7, fillColor: "#00ff41", fillOpacity: .04 + .5 * heat(f.st[2]) }),
+      onEachFeature: (f, layer) => {
+        stateLayers[f.st[1]] = layer;
+        layer.bindTooltip(`<div class="gtip">${stateTip(f.st)}</div>`, { sticky: true, opacity: 1, className: "ltip" });
+        layer.on("mouseover", () => layer.setStyle({ weight: 2.5, fillOpacity: .15 + .6 * heat(f.st[2]) }));
+        layer.on("mouseout", () => layer.setStyle({ weight: 1, fillOpacity: .04 + .5 * heat(f.st[2]) }));
+        layer.on("click", () => { map.fitBounds(layer.getBounds(), { maxZoom: 8 }); print(`&gt; ${esc(f.st[0])}: ${fmt(f.st[2])} mapped cameras, rank #${rankOf(f.st[1])}/${STATES.length}`, "", true); });
+      }
+    }).addTo(stateLayer);
+    return STATE_SHAPES;
+  })
+  .catch(() => { print("! state shapes unreachable; showing state markers instead", "a"); return []; });
 
 const cxIcon = L.divIcon({ className: "", html: '<div class="cx-ico pulse"></div>', iconSize: [12, 12] });
 EXITS.forEach(([p, st, d, a, why, lat, lon, s]) => {
@@ -304,6 +368,22 @@ map.on("mousemove", e => { $("#hud").innerHTML = `lat <b>${e.latlng.lat.toFixed(
 /* ---------- live cameras from OpenStreetMap (Overpass) ---------- */
 const OVERPASS = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://maps.mail.ru/osm/tools/overpass/api/interpreter"];
 const seen = new Set(); let camCount = 0, busy = false, auto = true;
+const camMarkers = new Map(); const wallItems = [];
+function addToWall(el) {
+  const tg = el.tags || {};
+  wallItems.unshift(el); if (wallItems.length > 24) wallItems.pop();
+  const wall = $("#wall");
+  wall.innerHTML = wallItems.map(e => {
+    const t = e.tags || {}, dir = t["camera:direction"] || t.direction;
+    return `<button class="tile" data-id="${e.id}"><b>NODE ${e.id}</b>${esc(t.manufacturer || t.brand || "ALPR")}${t.operator ? " · " + esc(t.operator) : ""}<br><span>${e.lat.toFixed(4)}, ${e.lon.toFixed(4)}${dir ? " · " + esc(dir) + "°" : ""}</span></button>`;
+  }).join("");
+  $("#mapwrap").classList.add("has-wall");
+}
+$("#wall").addEventListener("click", e => {
+  const t = e.target.closest(".tile"); if (!t) return;
+  const m = camMarkers.get(+t.dataset.id); if (!m) return;
+  map.setView(m.getLatLng(), Math.max(map.getZoom(), 16)); m.openPopup();
+});
 const camIcon = L.divIcon({ className: "", html: '<div class="cam-ico"></div>', iconSize: [10, 10] });
 
 function fovWedge(lat, lon, deg) {
@@ -340,8 +420,9 @@ async function scan(manual) {
     const dir = parseFloat(tg["camera:direction"] || tg.direction);
     if (!isNaN(dir)) fovWedge(el.lat, el.lon, dir).addTo(camLayer);
     const rows = Object.entries(tg).map(([k, v]) => `<span style="color:#4f8a5b">${esc(k)}</span>=${esc(v)}`).join("<br>");
-    L.marker([el.lat, el.lon], { icon: camIcon })
-      .bindPopup(`<b>ALPR node/${el.id}</b><br>${el.lat.toFixed(5)}, ${el.lon.toFixed(5)}<br>${rows}<br><a href="https://www.openstreetmap.org/node/${el.id}" target="_blank" rel="noopener">view on OSM ↗</a>`)
+    const mk = L.marker([el.lat, el.lon], { icon: camIcon });
+    camMarkers.set(el.id, mk); addToWall(el);
+    mk.bindPopup(`<b>ALPR node/${el.id}</b><br>${el.lat.toFixed(5)}, ${el.lon.toFixed(5)}<br>${rows}<br><a href="https://www.openstreetmap.org/node/${el.id}" target="_blank" rel="noopener">view on OSM ↗</a>`)
       .addTo(camLayer);
   }
   $("#net").textContent = `overpass: ${data.elements.length} in view`;
@@ -365,13 +446,89 @@ function showExits() {
 }
 $("#idx").addEventListener("click", e => {
   const r = e.target.closest("[data-ab],[data-i]"); if (!r) return;
-  if (r.dataset.ab) { const s = STATES.find(s => s[1] === r.dataset.ab); map.flyTo([s[3], s[4]], s[1] === "DC" || s[1] === "RI" || s[1] === "DE" ? 9 : 6); print(`&gt; ${esc(s[0])}: ${fmt(s[2])} mapped cameras`, "", true); }
-  else { const x = EXITS[+r.dataset.i]; map.flyTo([x[5], x[6]], 12); print(`&gt; ${esc(x[0])}, ${x[1]}: ${esc(x[3])} (${esc(x[2])}). ${esc(x[4])} ${srcLink(x[7])}`, "r", true); }
+  if (r.dataset.ab) { focusState(r.dataset.ab); }
+  else { const x = EXITS[+r.dataset.i]; if (mode === "globe") flyGlobe(x[5], x[6], .35); else map.flyTo([x[5], x[6]], 12); print(`&gt; ${esc(x[0])}, ${x[1]}: ${esc(x[3])} (${esc(x[2])}). ${esc(x[4])} ${srcLink(x[7])}`, "r", true); }
 });
 $("#idx").addEventListener("keydown", e => { if (e.key === "Enter") e.target.click(); });
 $("#tab-states").onclick = () => { $("#tab-states").setAttribute("aria-pressed", "true"); $("#tab-cx").setAttribute("aria-pressed", "false"); showStates(); };
 $("#tab-cx").onclick = () => { $("#tab-cx").setAttribute("aria-pressed", "true"); $("#tab-states").setAttribute("aria-pressed", "false"); showExits(); };
 showStates();
+
+/* ============================== globe ============================== */
+let mode = "globe", G = null, hoverF = null, selAb = null;
+const wrap = $("#mapwrap");
+function setMode(m) {
+  if (m === mode) return;
+  mode = m;
+  wrap.classList.toggle("globe", m === "globe"); wrap.classList.toggle("street", m === "street");
+  $("#m-globe").setAttribute("aria-pressed", m === "globe"); $("#m-street").setAttribute("aria-pressed", m === "street");
+  $("#target").classList.toggle("on", m === "globe" && !!selAb);
+  if (m === "street") setTimeout(() => map.invalidateSize(), 30);
+  else if (G) G.width(wrap.clientWidth).height(wrap.clientHeight);
+}
+$("#m-globe").onclick = () => setMode("globe");
+$("#m-street").onclick = () => setMode("street");
+function flyGlobe(lat, lng, alt = .55) { if (G) { G.controls().autoRotate = false; G.pointOfView({ lat, lng, altitude: alt }, 1400); } }
+const gAlt = f => .006 + .11 * heat(f.st[2]);
+const gCap = f => { const h = heat(f.st[2]); return `rgba(0,${Math.round(90 + 165 * h)},${Math.round(40 + 25 * h)},${(.28 + .6 * h).toFixed(2)})`; };
+function paintGlobe() {
+  if (!G) return;
+  G.polygonAltitude(f => f.st[1] === selAb ? gAlt(f) + .05 : f === hoverF ? gAlt(f) + .025 : gAlt(f))
+   .polygonCapColor(f => f.st[1] === selAb ? "rgba(190,255,205,.95)" : f === hoverF ? "rgba(0,255,65,.92)" : gCap(f));
+}
+function focusState(ab, quiet) {
+  const st = byAb[ab]; if (!st) return;
+  selAb = ab;
+  if (mode === "globe") { flyGlobe(st[3], st[4], ["DC", "RI", "DE", "CT", "NJ"].includes(ab) ? .35 : ["TX", "CA", "AK", "MT"].includes(ab) ? 1.05 : .7); paintGlobe(); }
+  else if (stateLayers[ab]) map.fitBounds(stateLayers[ab].getBounds(), { maxZoom: 8 });
+  else map.flyTo([st[3], st[4]], 6);
+  const ex = EXITS.filter(e => e[1] === ab);
+  $("#target").innerHTML = `<button class="x" aria-label="Close">✕</button><h3>◎ ${esc(st[0].toUpperCase())} [${ab}]</h3>
+    ${fmt(st[2])} mapped ALPRs · rank #${rankOf(ab)}/${STATES.length}<div class="meter"><i style="width:${(100 * st[2] / maxC).toFixed(1)}%"></i></div>
+    ${(100 * st[2] / TOTAL).toFixed(2)}% of the US total` +
+    (ex.length ? `<br><span style="color:#ff3355">✕ exits: ${ex.map(e => esc(e[0])).join(", ")}</span>` : "") +
+    `<button class="dive">DIVE ▸ STREET LEVEL</button>`;
+  $("#target").classList.toggle("on", mode === "globe");
+  $("#target .x").onclick = () => { $("#target").classList.remove("on"); selAb = null; paintGlobe(); };
+  $("#target .dive").onclick = () => { $("#target").classList.remove("on"); setMode("street"); setTimeout(() => focusState(ab, true), 60); print(`▦ diving into ${esc(st[0])}: zoom to a city and live camera nodes load`, "c", true); };
+  if (!quiet) print(`&gt; target ${esc(st[0])}: ${fmt(st[2])} mapped cameras, rank #${rankOf(ab)}/${STATES.length}`, "", true);
+}
+(async () => {
+  const el = $("#globe");
+  try {
+    if (typeof Globe !== "function") throw new Error("globe.gl missing");
+    G = Globe()(el)
+      .width(wrap.clientWidth).height(wrap.clientHeight)
+      .backgroundColor("rgba(0,0,0,0)")
+      .globeImageUrl("https://cdn.jsdelivr.net/npm/three-globe@2.45.3/example/img/earth-dark.jpg")
+      .bumpImageUrl("https://cdn.jsdelivr.net/npm/three-globe@2.45.3/example/img/earth-topology.png")
+      .showAtmosphere(true).atmosphereColor("#00ff41").atmosphereAltitude(.16)
+      .pointOfView({ lat: 37, lng: -97, altitude: 1.9 })
+      .polygonSideColor(() => "rgba(0,255,65,.18)")
+      .polygonStrokeColor(() => "#00ff41")
+      .polygonLabel(f => `<div class="gtip">${stateTip(f.st)}<br><span style="color:#4f8a5b">click to target</span></div>`)
+      .onPolygonHover(f => { hoverF = f; el.style.cursor = f ? "pointer" : "grab"; paintGlobe(); })
+      .onPolygonClick(f => focusState(f.st[1]))
+      .polygonsTransitionDuration(300)
+      .pointsData(EXITS.map(e => ({ e })))
+      .pointLat(d => d.e[5]).pointLng(d => d.e[6]).pointColor(() => "#ff3355").pointAltitude(.02).pointRadius(.22)
+      .pointLabel(d => `<div class="gtip"><b class="r">${esc(d.e[0])}, ${d.e[1]}</b><br>${esc(d.e[3])} · ${esc(d.e[2])}<br>${esc(d.e[4])}</div>`)
+      .onPointClick(d => { focusState(d.e[1], true); print(`&gt; ${esc(d.e[0])}, ${d.e[1]}: ${esc(d.e[3])} (${esc(d.e[2])}). ${esc(d.e[4])} ${srcLink(d.e[7])}`, "r", true); })
+      .ringsData(EXITS.map(e => ({ lat: e[5], lng: e[6] })))
+      .ringColor(() => t => `rgba(255,51,85,${(1 - t).toFixed(2)})`).ringMaxRadius(1.6).ringPropagationSpeed(1.2).ringRepeatPeriod(1600)
+      .labelsData(STATES.slice(0, 8)).labelLat(s => s[3]).labelLng(s => s[4]).labelText(s => `${s[1]} ${fmt(s[2])}`)
+      .labelSize(.9).labelDotRadius(.3).labelColor(() => "rgba(200,255,210,.9)").labelResolution(2).labelAltitude(.13);
+    const c = G.controls(); c.autoRotate = true; c.autoRotateSpeed = .35;
+    c.addEventListener("start", () => { c.autoRotate = false; });
+    new ResizeObserver(() => { if (mode === "globe") G.width(wrap.clientWidth).height(wrap.clientHeight); }).observe(wrap);
+    const shapes = await shapesReady;
+    G.polygonsData(shapes); paintGlobe();
+  } catch (err) {
+    print("! 3D globe needs WebGL; switching to the street map", "a");
+    mode = "globe"; setMode("street");
+  }
+})();
+$("#search").addEventListener("submit", e => { e.preventDefault(); const v = $("#q").value.trim(); if (v) run("goto " + v); });
 
 /* ============================== terminal ============================== */
 async function geocode(q) {
@@ -385,6 +542,7 @@ const CMDS = {
       "  news              timeline of the 2026 Flock story",
       "  top [n]           states ranked by mapped cameras",
       "  state <name|XX>   stats for one state and fly there",
+      "  globe | street    switch between the 3D globe and the street map",
       "  goto <place>      fly to a city / address (OSM geocoder)",
       "  scan              pull live ALPR points for the current view",
       "  near              locate you and scan around you",
@@ -410,11 +568,12 @@ const CMDS = {
     if (!s) return print(`! no state matching "${esc(q)}"`, "r");
     const ex = EXITS.filter(e => e[1] === s[1]);
     print(`${esc(s[0])} [${s[1]}] · ${fmt(s[2])} mapped ALPRs · ${(100 * s[2] / TOTAL).toFixed(2)}% of US · rank #${STATES.indexOf(s) + 1}` + (ex.length ? `\n  exits plotted: ${ex.map(e => esc(e[0])).join(", ")}` : ""), "", true);
-    map.flyTo([s[3], s[4]], 6);
+    focusState(s[1], true);
   },
   async goto(...a) {
     const q = a.join(" "); if (!q) return print("usage: goto <place>", "a");
     print(`$ geocode "${esc(q)}"`, "t", true);
+    setMode("street");
     try {
       const g = await geocode(q); if (!g) return print("! not found", "r");
       print(`→ ${esc(g.display_name)}`, "", true);
@@ -423,10 +582,13 @@ const CMDS = {
       map.once("moveend", () => { if (map.getZoom() < 11) map.setZoom(11); });
     } catch { print("! geocoder unreachable", "r"); }
   },
-  scan() { return scan(true); },
+  scan() { setMode("street"); return scan(true); },
+  globe() { setMode("globe"); print("◉ globe view: drag to spin, click a state, then DIVE to street level", "c", true); },
+  street() { setMode("street"); print("▦ street view: zoom into a city to load live camera nodes", "c", true); },
   near() {
     if (!navigator.geolocation) return print("! geolocation not available", "r");
     print("$ locate --self (your position stays in this browser)", "t", true);
+    setMode("street");
     navigator.geolocation.getCurrentPosition(p => { map.setView([p.coords.latitude, p.coords.longitude], 13); setTimeout(() => scan(true), 700); },
       () => print("! location permission denied", "r"));
   },
@@ -484,7 +646,7 @@ document.querySelectorAll(".chips button").forEach(b => b.onclick = () => run(b.
   "In 2026 the backlash went national: a leaked map of ~300k devices, a Florida highway ban, and 200+ cities walking away.",
   ""
 ].forEach((l, i) => print(l, i < 4 ? "t" : ""));
-print("type <b>help</b>, click a chip, or zoom into any city: live cameras load automatically.", "c");
+print("drag the <b>globe</b>, click a state, then <b>DIVE ▸ STREET LEVEL</b>. Or type <b>help</b>, or search a city above.", "c");
 </script>
 </body>
 </html>
