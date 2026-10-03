@@ -46,6 +46,7 @@ Every write goes through the journal. Every file received gets a manifest line w
 | other AI agents | export → drop folder, or POST `source=conversation` |
 | email to akira@artistsonly.io | Cloudflare Email Worker → `/api/akira/email` (attachments archived) |
 | Amos's Gmail | `gmail-sync` every heartbeat, read-only scope |
+| inbox cleanup (app-password Gmail, e.g. cosbymonica@gmail.com) | `mail-cleanup` daily: unsubscribes from bulk mail, archives it under `Akira/Unsubscribed`, never deletes; audit trail in `memory/raw/mail-cleanup/` |
 | Google Calendar | pulled every heartbeat; events Akira creates are pushed to the primary calendar |
 | the dashboard | "Tell Akira" box on `/akira` |
 | the internet | web-monitor cycle |

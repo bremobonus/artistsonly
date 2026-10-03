@@ -69,3 +69,27 @@ test("parseGmailMessage extracts headers, text body and attachments", async () =
   assert.equal(m.attachments[0].filename, "invoice.pdf");
   assert.equal(m.ts, "2026-09-28T12:53:20.000Z");
 });
+
+test("unsubscribe helpers: List-Unsubscribe, mailto, grouping and keep list", async () => {
+  const u = await import("../src/lib/unsubscribe.js");
+  const t = u.parseListUnsubscribe("<mailto:out@list.shop.com?subject=stop>, <https://shop.com/u?id=1>", "List-Unsubscribe=One-Click");
+  assert.deepEqual(t, { https: ["https://shop.com/u?id=1"], mailto: ["mailto:out@list.shop.com?subject=stop"], oneClick: true });
+  assert.equal(u.parseListUnsubscribe("<http://insecure.example/u>").https.length, 0);
+  assert.deepEqual(u.parseMailto("mailto:out@x.com?subject=stop"), { to: "out@x.com", subject: "stop", body: "unsubscribe" });
+  assert.deepEqual(u.parseFrom('"Shop News" <News@Shop.com>'), { name: "Shop News", address: "news@shop.com" });
+  const h = u.parseHeaderBlock("List-Unsubscribe: <https://a.com/u>,\r\n <mailto:u@a.com>\r\nList-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n");
+  assert.equal(h["list-unsubscribe"], "<https://a.com/u>, <mailto:u@a.com>");
+  const base = { subject: "s", listUnsubscribePost: "" };
+  const groups = u.groupBulkSenders(
+    [
+      { ...base, uid: 1, from: "<a@shop.com>", date: "2026-01-01", listUnsubscribe: "<https://shop.com/u>" },
+      { ...base, uid: 2, from: "<a@shop.com>", date: "2026-02-01", listUnsubscribe: "<https://shop.com/u2>" },
+      { ...base, uid: 3, from: "<friend@gmail.com>", date: "2026-02-01", listUnsubscribe: "" },
+      { ...base, uid: 4, from: "<alerts@mail.bank.ca>", date: "2026-02-01", listUnsubscribe: "<https://bank.ca/u>" },
+    ],
+    ["bank.ca"],
+  );
+  assert.equal(groups.length, 1);
+  assert.deepEqual(groups[0].uids, [1, 2]);
+  assert.deepEqual(groups[0].targets.https, ["https://shop.com/u2"]);
+});
