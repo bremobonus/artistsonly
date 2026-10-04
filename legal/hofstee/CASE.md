@@ -1,6 +1,6 @@
 # Criminal harassment matter: Lauren Hofstee (complainant)
 
-_Opened 2026-10-04 from Amos's account. Source: doc_muu0ij09_aa3e53, journal j_muu0ij0b_bfdcd9._
+_Opened 2026-10-04 from Amos's account. Source: doc_muu0ij09_aa3e53 (MANIFEST.jsonl), log j_muu0ij0b_bfdcd9 (LOG.jsonl)._
 
 ## Facts as reported by Amos (not yet checked against any other record)
 - Complainant: Lauren Hofstee. Accused: her former boyfriend of about 3 years. His name has not been recorded.
@@ -17,4 +17,4 @@ First-hand witness to the 23 Aug incident. He is not a party.
 Occurrence number · accused's name · exact release conditions (incl. any no-contact-with-witnesses term) · first court date · Crown/VWAP contact · names of the other witnesses · exact times · who received the apology text · Lauren's log of earlier contacts.
 
 ## Working page
-https://claude.ai/artifact/YUhWQV2RWk8xwwsKr4kv4P (private). Answers are stored in db `case/intake`. Read them back, journal them, and update this file.
+https://claude.ai/artifact/YUhWQV2RWk8xwwsKr4kv4P (private). Answers are stored in db `case/intake`. Read them back, append to LOG.jsonl, and update this file.

@@ -29,10 +29,9 @@ test("rememberLongTerm appends under section", () => {
 });
 
 test("storeDocument writes file and manifest with sha256", () => {
-  const before = brain.manifestCount();
   const m = brain.storeDocument({ bytes: Buffer.from("contract"), originalName: "c.txt", source: "test" });
   assert.equal(m.sha256.length, 64);
-  assert.equal(brain.manifestCount(), before + 1);
+  assert.equal(brain.manifestCount(), 1);
   assert.ok(fs.existsSync(path.join(tmp, "brain", m.storedAs)));
 });
 

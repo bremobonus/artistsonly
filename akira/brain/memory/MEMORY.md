@@ -26,9 +26,8 @@ _Curated by Akira. Every fact here is also in the journal with a source. Last co
 _(see `people/`)_
 
 ## Projects
-_(see `projects/`)_ · hofstee-case (legal, witness) _(src: j_muu0ij0b_bfdcd9)_
+_(see `projects/`)_
 
 ## Open loops
-- [ ] Hofstee criminal harassment matter: Amos is a witness to the 23 Aug 2026 Guelph Boathouse incident. Collect the occurrence number, release conditions, first court date and Amos's own written statement. See `projects/hofstee-case.md`. _(src: j_muu0ij0b_bfdcd9)_
 - [x] identity.json filled from Amos's page answers 2026-09-28 (his own email addresses still unknown; ntfy topic unknown).
 - [x] Amos ticked Mac agent, phone, email routing, Vercel, secrets as done on 2026-09-28 (unverified until data arrives).
