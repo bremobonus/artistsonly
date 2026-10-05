@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T14:44:48.041Z",
+  "generatedAt": "2026-10-05T15:51:55.636Z",
   "assistant": {
     "name": "Akira",
     "email": "akira@artistsonly.io",
@@ -12,10 +12,10 @@
   },
   "now": {
     "lastCycle": {
-      "ts": "2026-10-05T14:44:48.040Z",
-      "cycle": "heartbeat",
-      "action": "ok",
-      "detail": "4 ms"
+      "ts": "2026-10-05T15:51:55.635Z",
+      "cycle": "web-monitor",
+      "action": "skipped",
+      "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
     },
     "nextCycles": [
       {
@@ -399,6 +399,12 @@
   ],
   "activity": [
     {
+      "ts": "2026-10-05T15:51:55.635Z",
+      "cycle": "web-monitor",
+      "action": "skipped",
+      "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
+    },
+    {
       "ts": "2026-10-05T14:44:48.040Z",
       "cycle": "heartbeat",
       "action": "ok",
@@ -751,12 +757,6 @@
       "cycle": "calendar-sync",
       "action": "synced",
       "detail": "0 imported from 0 feed(s), 0 Akira-owned"
-    },
-    {
-      "ts": "2026-10-03T23:44:51.440Z",
-      "cycle": "web-monitor",
-      "action": "skipped",
-      "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
     }
   ],
   "memoryExcerpt": "# Akira — Long-term memory\n\n_Curated by Akira. Every fact here is also in the journal with a source. Last compaction: never._\n\n## Amos\n- Amos LeBlanc (also written Amos Le Blanc). Director of music videos; AI director / AI production company; Dream Inc (thedream.io). _(src: j_2026-09-28_0007)_\n- Owner of artistsonly.io. Timezone America/Toronto, confirmed 2026-09-28. _(src: j_2026-09-28_0005)_\n- Work or project titled \"Mi amour\" (context unknown yet). _(src: j_2026-09-28_0005)_\n- Wants Akira anticipating his needs and improving his life and career. _(src: j_2026-09-28_0005)_\n- Wants: everything tracked, nothing forgotten, records kept for legal defence.\n\n## Preferences\n- Visual style: light, Apple-like, sleek and minimalist (system font, #f5f5f7 ground, white cards, blue accent). _(src: j_2026-09-28_0004)_\n\n## Akira\n- Full name Akira Nakita. Addresses akira@artistsonly.io and akira@thedream.io. _(src: j_2026-09-28_0005)_\n\n## Standing instructions\n- Draft, do not send, unless pre-approved.\n- Daily brief at 07:00 local.\n- Watch the web for mentions of Amos and artistsonly.io.\n- 2026-09-28: Amos ruled that all work is shown to him as an interactive HTML page he can respond on. _(src: CLAUDE.md)_\n- 2026-09-28: Amos ruled that Akira must never ask him; decide, act within her powers, log the decision. _(src: rules/autonomy.md)_\n\n## People\n_(see `people/`)_\n\n## Projects\n_(see `projects/`)_\n\n## Open loops\n- [x] identity.json filled from Amos's page answers 2026-09-28 (his own email addresses still unknown; ntfy topic unknown).\n- [x] Amos ticked Mac agent, phone, email routing, Vercel, secrets as done on 2026-09-28 (unverified until data arrives).\n"
