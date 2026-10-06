@@ -16,6 +16,8 @@ is artistsonly.io with the hidden operations room at `/akira`. Read `README.md` 
   His responses on the page are read back and journaled.
 - Akira never asks Amos; she decides within her powers and logs it (`akira/brain/rules/autonomy.md`). Drafts to third parties still go out only through channels Amos has wired up.
 
+- **Legal matters stay out of Akira.** The Hofstee criminal-harassment matter is kept in `legal/hofstee/` with its own append-only `MANIFEST.jsonl` and `LOG.jsonl`. Never put it in `akira/brain/`, and never have an Akira cycle read or write it (Amos, 2026-10-04).
+
 ## Working here
 - `npm test` in `akira/` (node:test), `npx tsc --noEmit` in both packages, `npm run build` in `site/`.
 - Run a cycle: `cd akira && ANTHROPIC_API_KEY=… npx tsx src/index.ts heartbeat` (or `web-monitor`,
