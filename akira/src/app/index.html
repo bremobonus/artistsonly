@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Akira</title>
+<style>
+  :root { color-scheme: light; --bg:#f5f5f7; --panel:#ffffff; --panel-2:#f2f2f5; --line:#e6e6ea; --text:#1d1d1f; --muted:#86868b; --accent:#0071e3; --ok:#34c759; --warn:#ff9f0a; --bad:#ff3b30;
+    --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif; --mono:"SF Mono",ui-monospace,Menlo,monospace; }
+  * { box-sizing:border-box; }
+  html,body { height:100%; margin:0; background:var(--bg); color:var(--text); font-family:var(--sans); -webkit-font-smoothing:antialiased; }
+  body { display:flex; flex-direction:column; }
+  header { display:flex; align-items:center; gap:12px; padding:14px 22px; background:rgba(245,245,247,.85); backdrop-filter:saturate(180%) blur(20px); position:sticky; top:0; z-index:2; }
+  header h1 { font-size:17px; font-weight:600; margin:0; letter-spacing:-0.01em; }
+  .dot { width:9px; height:9px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 3px rgba(52,199,89,.18); }
+  .dot.off { background:#c7c7cc; box-shadow:none; }
+  .status { font-size:13px; color:var(--muted); }
+  .sp { flex:1; }
+  .btn { font:inherit; font-size:13px; font-weight:500; border:0; border-radius:980px; padding:7px 14px; background:#fff; color:var(--text); cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,.06), 0 0 0 1px var(--line) inset; }
+  .btn.on { background:var(--accent); color:#fff; box-shadow:none; }
+  .btn:disabled { opacity:.5; cursor:default; }
+  main { flex:1; display:grid; grid-template-columns:minmax(0,1fr) 380px; min-height:0; }
+  main.solo { grid-template-columns:1fr; }
+  @media (max-width:860px) { main { grid-template-columns:1fr; } aside { display:none; } main.show-today aside { display:flex; position:fixed; inset:60px 0 0 0; z-index:3; } }
+  .chat { display:flex; flex-direction:column; min-width:0; }
+  .msgs { flex:1; overflow:auto; padding:24px 22px; display:flex; flex-direction:column; gap:12px; }
+  .m { max-width:min(680px,82%); padding:12px 16px; border-radius:20px; font-size:16px; line-height:1.5; white-space:pre-wrap; word-wrap:break-word; }
+  .m.user { align-self:flex-end; background:var(--accent); color:#fff; border-bottom-right-radius:6px; }
+  .m.akira { align-self:flex-start; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.05); border-bottom-left-radius:6px; }
+  .m .t { display:block; font-size:11px; opacity:.55; margin-top:6px; }
+  .m.akira .t { color:var(--muted); }
+  .typing { color:var(--muted); font-size:13px; padding:0 22px 6px; min-height:20px; }
+  .compose { display:flex; gap:10px; padding:12px 22px 20px; align-items:flex-end; }
+  .box { flex:1; display:flex; align-items:flex-end; gap:8px; background:#fff; border-radius:24px; padding:8px 8px 8px 16px; box-shadow:0 1px 3px rgba(0,0,0,.08), 0 0 0 1px var(--line) inset; }
+  .box:focus-within { box-shadow:0 0 0 3px rgba(0,113,227,.2), 0 0 0 1px var(--accent) inset; }
+  textarea { flex:1; font:inherit; font-size:16px; border:0; background:transparent; resize:none; min-height:28px; max-height:160px; padding:4px 0; outline:none; }
+  .ic { width:38px; height:38px; border-radius:50%; border:0; display:grid; place-items:center; cursor:pointer; background:var(--panel-2); color:var(--text); flex:none; }
+  .ic svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .ic.send { background:var(--accent); color:#fff; }
+  .ic.mic.live { background:var(--bad); color:#fff; animation:pulse 1.2s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(255,59,48,.45)} 70%{box-shadow:0 0 0 12px rgba(255,59,48,0)} 100%{box-shadow:0 0 0 0 rgba(255,59,48,0)} }
+  aside { display:flex; flex-direction:column; gap:12px; overflow:auto; padding:18px 18px 28px; background:var(--bg); border-left:1px solid var(--line); }
+  .card { background:#fff; border-radius:16px; padding:16px 18px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+  .card h2 { margin:0 0 10px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); display:flex; justify-content:space-between; }
+  .card h2 span { text-transform:none; letter-spacing:0; font-weight:500; }
+  ul { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px; }
+  li { display:flex; gap:10px; align-items:flex-start; font-size:14px; line-height:1.4; }
+  li .k { font-family:var(--mono); font-size:11.5px; color:var(--muted); white-space:nowrap; padding-top:2px; min-width:56px; }
+  li input[type=checkbox] { margin-top:3px; accent-color:var(--accent); width:16px; height:16px; flex:none; }
+  li.done { color:var(--muted); text-decoration:line-through; }
+  .why { display:block; color:var(--muted); font-size:12.5px; text-decoration:none; }
+  .rank { font-weight:700; color:var(--accent); min-width:18px; }
+  .gap { background:rgba(255,159,10,.12); color:#9a5b00; border-radius:12px; padding:10px 12px; font-size:13px; }
+  .empty { color:var(--muted); font-size:13px; }
+  .feed li { font-size:13px; }
+  .tag { font-size:11px; padding:1px 7px; border-radius:980px; background:var(--panel-2); color:var(--muted); }
+  .tag.urgent,.tag.high { background:rgba(255,59,48,.12); color:var(--bad); }
+  pre.mem { white-space:pre-wrap; font-family:var(--mono); font-size:12px; color:var(--muted); margin:0; max-height:200px; overflow:auto; }
+  .welcome { align-self:center; text-align:center; color:var(--muted); margin:auto; max-width:420px; }
+  .welcome h2 { font-size:28px; font-weight:600; letter-spacing:-0.02em; color:var(--text); margin:0 0 8px; }
+</style>
+</head>
+<body>
+<header>
+  <span class="dot" id="dot"></span><h1>Akira</h1><span class="status" id="status"></span><span class="sp"></span>
+  <button class="btn" id="speak" title="Read Akira's replies aloud">Voice: on</button>
+  <button class="btn" id="heartbeat" title="Run a heartbeat now">Heartbeat</button>
+  <button class="btn" id="sync" title="Commit the brain and push to GitHub">Sync</button>
+  <button class="btn" id="toggleToday">Today</button>
+</header>
+<main id="main">
+  <section class="chat">
+    <div class="msgs" id="msgs"></div>
+    <div class="typing" id="typing"></div>
+    <form class="compose" id="form">
+      <div class="box">
+        <textarea id="input" placeholder="Talk to Akira, or hold the mic" rows="1"></textarea>
+        <button class="ic mic" id="mic" type="button" title="Speak (click to start, click to stop)"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+        <button class="ic send" id="send" type="submit" title="Send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+      </div>
+    </form>
+  </section>
+  <aside id="today"><div class="empty">loading…</div></aside>
+</main>
+<script>
+(function(){
+  var msgs=document.getElementById('msgs'), typing=document.getElementById('typing'), form=document.getElementById('form'), input=document.getElementById('input'), send=document.getElementById('send'), todayEl=document.getElementById('today'), mic=document.getElementById('mic'), speakBtn=document.getElementById('speak'), statusEl=document.getElementById('status');
+  var speakOn=true; try{ speakOn=localStorage.getItem('akira.speak')!=='off'; }catch(e){}
+  speakBtn.textContent='Voice: '+(speakOn?'on':'off'); speakBtn.classList.toggle('on',speakOn);
+  function esc(s){return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+  function fmt(iso,opts){ if(!iso) return ''; if(iso.length===10) return iso; try{return new Intl.DateTimeFormat('en-CA',opts||{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(iso));}catch(e){return iso;} }
+  function addMsg(role,text,ts){ var w=msgs.querySelector('.welcome'); if(w) w.remove(); var d=document.createElement('div'); d.className='m '+(role==='user'?'user':'akira'); d.innerHTML=esc(text)+'<span class="t">'+fmt(ts,{hour:'2-digit',minute:'2-digit'})+'</span>'; msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight; }
+  function welcome(){ msgs.innerHTML='<div class="welcome"><h2>Good day, Amos.</h2><p>Ask what is going on, what to do first, or tell me something to remember. Hold the mic to talk; I will answer out loud.</p></div>'; }
+  function loadHistory(){ fetch('/api/history').then(function(r){return r.json();}).then(function(j){ msgs.innerHTML=''; if(j.turns&&j.turns.length){ j.turns.forEach(function(t){addMsg(t.role,t.text,t.ts);}); } else welcome(); }); }
+
+  // ---- voice out (browser, local) ----
+  var voice=null;
+  function pickVoice(){ var vs=speechSynthesis.getVoices(); if(!vs.length) return; var prefer=['Samantha','Ava','Allison','Zoe','Karen','Moira','Google US English','Google UK English Female']; for(var i=0;i<prefer.length;i++){ var v=vs.find(function(x){return x.name.indexOf(prefer[i])===0;}); if(v){voice=v;return;} } voice=vs.find(function(x){return /^en/.test(x.lang);})||vs[0]; }
+  if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; } else { speakBtn.disabled=true; speakBtn.textContent='Voice: n/a'; }
+  function say(text){ if(!speakOn||!('speechSynthesis' in window)) return; speechSynthesis.cancel(); var clean=text.replace(/[*_`#>]/g,'').replace(/https?:\/\/\S+/g,'link'); var u=new SpeechSynthesisUtterance(clean); if(voice) u.voice=voice; u.rate=1.02; u.pitch=1; speechSynthesis.speak(u); }
+  speakBtn.addEventListener('click',function(){ speakOn=!speakOn; try{localStorage.setItem('akira.speak',speakOn?'on':'off');}catch(e){} speakBtn.textContent='Voice: '+(speakOn?'on':'off'); speakBtn.classList.toggle('on',speakOn); if(!speakOn) speechSynthesis.cancel(); });
+
+  // ---- voice in (browser, local) ----
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition, rec=null, listening=false;
+  if(!SR){ mic.disabled=true; mic.title='Speech recognition is not available in this browser; use Safari or Chrome.'; }
+  function stopListening(){ if(rec){ try{rec.stop();}catch(e){} } listening=false; mic.classList.remove('live'); statusEl.textContent=''; }
+  mic.addEventListener('click',function(){ if(!SR) return; if(listening){ stopListening(); return; } speechSynthesis && speechSynthesis.cancel(); rec=new SR(); rec.lang='en-CA'; rec.interimResults=true; rec.continuous=false; var finalText='';
+    rec.onresult=function(e){ var interim=''; for(var i=e.resultIndex;i<e.results.length;i++){ if(e.results[i].isFinal) finalText+=e.results[i][0].transcript; else interim+=e.results[i][0].transcript; } input.value=(finalText+' '+interim).trim(); };
+    rec.onend=function(){ stopListening(); if(input.value.trim()) form.requestSubmit(); };
+    rec.onerror=function(e){ stopListening(); statusEl.textContent='Mic: '+e.error; };
+    listening=true; mic.classList.add('live'); statusEl.textContent='Listening…'; try{ rec.start(); }catch(e){ stopListening(); } });
+
+  // ---- today panel ----
+  function li(k,html,cls){ return '<li'+(cls?' class="'+cls+'"':'')+'><span class="k">'+esc(k)+'</span><span>'+html+'</span></li>'; }
+  function renderToday(d){
+    document.getElementById('dot').className='dot'+(d.gaps.length?' off':'');
+    var h='';
+    if(d.gaps.length) h+='<div class="gap">'+d.gaps.map(esc).join('<br>')+'</div>';
+    h+='<div class="card"><h2>Do first <span>'+esc(d.priorities.date||'')+'</span></h2>';
+    if(d.priorities.items&&d.priorities.items.length){ h+='<ul>'+d.priorities.items.map(function(p){ return '<li class="'+(p.status==='done'||p.status==='dropped'?'done':'')+'"><input type="checkbox" data-rank="'+p.rank+'" '+(p.status==='done'?'checked':'')+'><span class="rank">'+p.rank+'</span><span>'+esc(p.text)+'<span class="why">'+esc(p.why||'')+'</span></span></li>'; }).join('')+'</ul>'; if(d.priorities.notes) h+='<p class="empty">'+esc(d.priorities.notes)+'</p>'; } else h+='<div class="empty">No priorities yet. Ask: "what should I do first today?"</div>';
+    h+='</div>';
+    h+='<div class="card"><h2>Reminders <span>'+d.reminders.length+' open'+(d.overdue.length?' · '+d.overdue.length+' overdue':'')+'</span></h2>'+(d.reminders.length?'<ul>'+d.reminders.map(function(r){return '<li><input type="checkbox" data-rem="'+esc(r.id)+'"><span class="k">'+fmt(r.due)+'</span><span>'+esc(r.text)+' <span class="tag '+esc(r.priority)+'">'+esc(r.priority)+'</span></span></li>';}).join('')+'</ul>':'<div class="empty">nothing</div>')+'</div>';
+    h+='<div class="card"><h2>Next 14 days <span>'+d.calendar.length+'</span></h2>'+(d.calendar.length?'<ul>'+d.calendar.map(function(e){return li(fmt(e.start),esc(e.title)+(e.location?'<span class="why">'+esc(e.location)+'</span>':''));}).join('')+'</ul>':'<div class="empty">nothing</div>')+'</div>';
+    h+='<div class="card"><h2>What is going on <span>journal</span></h2>'+(d.journal.length?'<ul class="feed">'+d.journal.map(function(j){return li(fmt(j.ts,{month:'short',day:'numeric'}),esc(j.summary));}).join('')+'</ul>':'<div class="empty">quiet</div>')+'</div>';
+    if(d.decisions.length) h+='<div class="card"><h2>Decisions Akira made</h2><ul class="feed">'+d.decisions.map(function(q){return li(fmt(q.askedAt,{month:'short',day:'numeric'}),esc(q.text));}).join('')+'</ul></div>';
+    if(d.mentions.length) h+='<div class="card"><h2>Said about you online</h2><ul class="feed">'+d.mentions.map(function(m){return li(fmt(m.foundAt,{month:'short',day:'numeric'}),'<a href="'+esc(m.url)+'" target="_blank" rel="noreferrer">'+esc(m.title)+'</a> '+esc(m.summary));}).join('')+'</ul></div>';
+    h+='<div class="card"><h2>Akira activity</h2><ul class="feed">'+d.activity.map(function(a){return li(fmt(a.ts,{hour:'2-digit',minute:'2-digit'}),esc(a.cycle+' '+a.action+': '+a.detail));}).join('')+'</ul></div>';
+    h+='<div class="card"><h2>Memory</h2><pre class="mem">'+esc(d.memoryExcerpt)+'</pre></div>';
+    todayEl.innerHTML=h;
+    todayEl.querySelectorAll('input[data-rank]').forEach(function(b){ b.addEventListener('change',function(){ fetch('/api/priority',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({rank:Number(b.dataset.rank),status:b.checked?'done':'todo'})}).then(loadToday); }); });
+    todayEl.querySelectorAll('input[data-rem]').forEach(function(b){ b.addEventListener('change',function(){ fetch('/api/reminder',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:b.dataset.rem,done:b.checked})}).then(loadToday); }); });
+  }
+  function loadToday(){ return fetch('/api/today').then(function(r){return r.json();}).then(renderToday).catch(function(e){ todayEl.innerHTML='<div class="gap">'+esc(e.message)+'</div>'; }); }
+  document.getElementById('toggleToday').addEventListener('click',function(){ var m=document.getElementById('main'); if(window.innerWidth<=860) m.classList.toggle('show-today'); else m.classList.toggle('solo'); });
+
+  // ---- chat ----
+  form.addEventListener('submit',function(e){ e.preventDefault(); var text=input.value.trim(); if(!text) return; input.value=''; input.style.height='auto'; addMsg('user',text,new Date().toISOString()); send.disabled=true; typing.textContent='Akira is thinking…';
+    fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text})}).then(function(r){return r.json();}).then(function(j){ var reply=j.reply||j.error||'(no reply)'; addMsg('assistant',reply,new Date().toISOString()); say(reply); loadToday(); }).catch(function(err){ addMsg('assistant','Error: '+err.message,new Date().toISOString()); }).then(function(){ send.disabled=false; typing.textContent=''; input.focus(); }); });
+  input.addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); form.requestSubmit(); } });
+  input.addEventListener('input',function(){ input.style.height='auto'; input.style.height=Math.min(160,input.scrollHeight)+'px'; });
+  document.getElementById('heartbeat').addEventListener('click',function(){ typing.textContent='Running heartbeat…'; fetch('/api/cycle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'heartbeat'})}).then(function(r){return r.json();}).then(function(j){ addMsg('assistant','Heartbeat:\n'+(j.out||'').trim(),new Date().toISOString()); loadToday(); }).then(function(){ typing.textContent=''; }); });
+  document.getElementById('sync').addEventListener('click',function(){ typing.textContent='Syncing…'; fetch('/api/sync',{method:'POST'}).then(function(r){return r.json();}).then(function(j){ addMsg('assistant','Sync: '+(j.out||''),new Date().toISOString()); }).then(function(){ typing.textContent=''; }); });
+  loadHistory(); loadToday(); setInterval(loadToday, 60000);
+})();
+</script>
+</body>
+</html>

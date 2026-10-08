@@ -39,6 +39,8 @@ export interface RunOpts {
   cycle: string;
   instructions: string;
   userContent: string;
+  /** Prior turns (user/assistant) for chat; userContent is appended as the newest user turn. */
+  history?: Anthropic.Beta.BetaMessageParam[];
   tools: Array<BetaRunnableTool<any> | Anthropic.Beta.BetaToolUnion>;
   maxIterations?: number;
   effort?: "low" | "medium" | "high" | "xhigh" | "max";
@@ -57,7 +59,7 @@ export async function runAgent(opts: RunOpts): Promise<{ text: string; message: 
     thinking: { type: "adaptive" },
     output_config: { effort: opts.effort ?? "high" },
     tools: opts.tools as Anthropic.Beta.BetaToolUnion[] as any,
-    messages: [{ role: "user", content: opts.userContent }],
+    messages: [...(opts.history ?? []), { role: "user", content: opts.userContent }],
     max_iterations: opts.maxIterations ?? 12,
   });
 
