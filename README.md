@@ -73,6 +73,17 @@ Every write goes through the journal. Every file received gets a manifest line w
 
 Keep this repository **private**: it is Amos's memory.
 
+## Akira on your Mac (the app)
+```
+cd akira && npm install
+ANTHROPIC_API_KEY=… npm run app      # add GOOGLE_* vars after `npm run google-auth` for Gmail + Calendar
+open http://localhost:4747
+```
+A chat with Akira on the left (she uses all her tools and records every turn in
+`akira/brain/memory/conversations/`), and Today on the right: ranked priorities, reminders, the next 14
+days, what is going on, decisions, mentions, her activity. Tick priorities and reminders there. **Heartbeat**
+runs a cycle now; **Sync** commits the brain and pushes it to `main`. Loopback only; nothing is exposed.
+
 ## Local development
 ```
 npm install --prefix akira && npm install --prefix site
