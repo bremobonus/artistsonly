@@ -1,6 +1,54 @@
 {
   "items": [
     {
+      "ts": "2026-10-08T17:47:31.633Z",
+      "cycle": "daily-brief",
+      "action": "skipped",
+      "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
+    },
+    {
+      "ts": "2026-10-08T17:47:31.632Z",
+      "cycle": "mail-cleanup",
+      "action": "ok",
+      "detail": "18 ms"
+    },
+    {
+      "ts": "2026-10-08T17:47:31.614Z",
+      "cycle": "mail-cleanup",
+      "action": "skipped",
+      "detail": "CLEANUP_GMAIL_ADDRESS plus CLEANUP_GOOGLE_REFRESH_TOKEN (with a Google OAuth client) or CLEANUP_GMAIL_APP_PASSWORD not set"
+    },
+    {
+      "ts": "2026-10-08T17:47:31.611Z",
+      "cycle": "heartbeat",
+      "action": "ok",
+      "detail": "4 ms"
+    },
+    {
+      "ts": "2026-10-08T17:47:31.610Z",
+      "cycle": "reminders",
+      "action": "checked",
+      "detail": "0 fired, 0 open"
+    },
+    {
+      "ts": "2026-10-08T17:47:31.609Z",
+      "cycle": "process-inbox",
+      "action": "idle",
+      "detail": "inbox empty"
+    },
+    {
+      "ts": "2026-10-08T17:47:31.608Z",
+      "cycle": "gmail-sync",
+      "action": "skipped",
+      "detail": "Google not configured (GOOGLE_CLIENT_ID/SECRET/REFRESH_TOKEN)"
+    },
+    {
+      "ts": "2026-10-08T17:47:31.607Z",
+      "cycle": "calendar-sync",
+      "action": "synced",
+      "detail": "0 imported from 0 feed(s), 0 Akira-owned"
+    },
+    {
       "ts": "2026-10-08T16:50:33.395Z",
       "cycle": "heartbeat",
       "action": "ok",
@@ -1751,54 +1799,6 @@
       "cycle": "calendar-sync",
       "action": "synced",
       "detail": "0 imported from 0 feed(s), 0 Akira-owned"
-    },
-    {
-      "ts": "2026-09-29T19:16:38.131Z",
-      "cycle": "web-monitor",
-      "action": "failed",
-      "detail": "Error: Could not resolve authentication method. Expected one of apiKey, authToken, credentials, config, or profile to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted\n    at Anthropic.validateHeaders (/home/runner/work/artistsonly/artistsonly/akira/node_modules/@anthropic-ai/sdk/src/client.ts:915:11)\n    at Anthropic.buildHeaders (/home/runner/work/artistsonly/artistsonly/akira/node_modules/@anthropic-ai/sdk/src/client.ts:1588:10)\n    at async Anthropic.b"
-    },
-    {
-      "ts": "2026-09-29T16:50:44.472Z",
-      "cycle": "daily-brief",
-      "action": "failed",
-      "detail": "Error: Could not resolve authentication method. Expected one of apiKey, authToken, credentials, config, or profile to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted\n    at Anthropic.validateHeaders (/home/runner/work/artistsonly/artistsonly/akira/node_modules/@anthropic-ai/sdk/src/client.ts:915:11)\n    at Anthropic.buildHeaders (/home/runner/work/artistsonly/artistsonly/akira/node_modules/@anthropic-ai/sdk/src/client.ts:1588:10)\n    at async Anthropic.b"
-    },
-    {
-      "ts": "2026-09-29T16:50:44.382Z",
-      "cycle": "heartbeat",
-      "action": "ok",
-      "detail": "6 ms"
-    },
-    {
-      "ts": "2026-09-29T16:50:44.379Z",
-      "cycle": "reminders",
-      "action": "checked",
-      "detail": "0 fired, 0 open"
-    },
-    {
-      "ts": "2026-09-29T16:50:44.378Z",
-      "cycle": "process-inbox",
-      "action": "idle",
-      "detail": "inbox empty"
-    },
-    {
-      "ts": "2026-09-29T16:50:44.377Z",
-      "cycle": "calendar-sync",
-      "action": "synced",
-      "detail": "0 imported from 0 feed(s), 0 Akira-owned"
-    },
-    {
-      "ts": "2026-09-29T15:49:52.320Z",
-      "cycle": "heartbeat",
-      "action": "ok",
-      "detail": "3 ms"
-    },
-    {
-      "ts": "2026-09-29T15:49:52.320Z",
-      "cycle": "reminders",
-      "action": "checked",
-      "detail": "0 fired, 0 open"
     }
   ]
 }
