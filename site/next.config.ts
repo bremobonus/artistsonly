@@ -3,6 +3,15 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  async rewrites() {
+    // bremo.io/flock (and artistsonly.io/flock): the Flock camera map, a static page in public/.
+    // beforeFiles so the bremo.io root is served the map rather than the artistsonly.io landing page.
+    return {
+      beforeFiles: [{ source: "/", has: [{ type: "host", value: "(www\\.)?bremo\\.io" }], destination: "/flock.html" }],
+      afterFiles: [{ source: "/flock", destination: "/flock.html" }],
+      fallback: [],
+    };
+  },
   async headers() {
     return [
       {
