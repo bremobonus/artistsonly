@@ -1,6 +1,36 @@
 {
   "items": [
     {
+      "ts": "2026-10-14T00:27:02.561Z",
+      "cycle": "heartbeat",
+      "action": "ok",
+      "detail": "5 ms"
+    },
+    {
+      "ts": "2026-10-14T00:27:02.560Z",
+      "cycle": "reminders",
+      "action": "checked",
+      "detail": "0 fired, 0 open"
+    },
+    {
+      "ts": "2026-10-14T00:27:02.559Z",
+      "cycle": "process-inbox",
+      "action": "idle",
+      "detail": "inbox empty"
+    },
+    {
+      "ts": "2026-10-14T00:27:02.558Z",
+      "cycle": "gmail-sync",
+      "action": "skipped",
+      "detail": "Google not configured (GOOGLE_CLIENT_ID/SECRET/REFRESH_TOKEN)"
+    },
+    {
+      "ts": "2026-10-14T00:27:02.557Z",
+      "cycle": "calendar-sync",
+      "action": "synced",
+      "detail": "0 imported from 0 feed(s), 0 Akira-owned"
+    },
+    {
       "ts": "2026-10-13T21:19:02.499Z",
       "cycle": "heartbeat",
       "action": "ok",
@@ -1766,36 +1796,6 @@
     },
     {
       "ts": "2026-10-05T00:35:30.586Z",
-      "cycle": "heartbeat",
-      "action": "ok",
-      "detail": "4 ms"
-    },
-    {
-      "ts": "2026-10-05T00:35:30.586Z",
-      "cycle": "reminders",
-      "action": "checked",
-      "detail": "0 fired, 0 open"
-    },
-    {
-      "ts": "2026-10-05T00:35:30.585Z",
-      "cycle": "process-inbox",
-      "action": "idle",
-      "detail": "inbox empty"
-    },
-    {
-      "ts": "2026-10-05T00:35:30.584Z",
-      "cycle": "gmail-sync",
-      "action": "skipped",
-      "detail": "Google not configured (GOOGLE_CLIENT_ID/SECRET/REFRESH_TOKEN)"
-    },
-    {
-      "ts": "2026-10-05T00:35:30.583Z",
-      "cycle": "calendar-sync",
-      "action": "synced",
-      "detail": "0 imported from 0 feed(s), 0 Akira-owned"
-    },
-    {
-      "ts": "2026-10-04T21:58:33.445Z",
       "cycle": "heartbeat",
       "action": "ok",
       "detail": "4 ms"
