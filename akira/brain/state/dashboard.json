@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-18T14:28:15.457Z",
+  "generatedAt": "2026-10-18T14:49:24.283Z",
   "assistant": {
     "name": "Akira",
     "email": "akira@artistsonly.io",
@@ -12,10 +12,10 @@
   },
   "now": {
     "lastCycle": {
-      "ts": "2026-10-18T14:28:15.455Z",
-      "cycle": "web-monitor",
-      "action": "skipped",
-      "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
+      "ts": "2026-10-18T14:49:24.278Z",
+      "cycle": "heartbeat",
+      "action": "ok",
+      "detail": "4 ms"
     },
     "nextCycles": [
       {
@@ -411,6 +411,36 @@
   ],
   "activity": [
     {
+      "ts": "2026-10-18T14:49:24.278Z",
+      "cycle": "heartbeat",
+      "action": "ok",
+      "detail": "4 ms"
+    },
+    {
+      "ts": "2026-10-18T14:49:24.278Z",
+      "cycle": "reminders",
+      "action": "checked",
+      "detail": "0 fired, 0 open"
+    },
+    {
+      "ts": "2026-10-18T14:49:24.277Z",
+      "cycle": "process-inbox",
+      "action": "idle",
+      "detail": "inbox empty"
+    },
+    {
+      "ts": "2026-10-18T14:49:24.276Z",
+      "cycle": "gmail-sync",
+      "action": "skipped",
+      "detail": "Google not configured (GOOGLE_CLIENT_ID/SECRET/REFRESH_TOKEN)"
+    },
+    {
+      "ts": "2026-10-18T14:49:24.275Z",
+      "cycle": "calendar-sync",
+      "action": "synced",
+      "detail": "0 imported from 0 feed(s), 0 Akira-owned"
+    },
+    {
       "ts": "2026-10-18T14:28:15.455Z",
       "cycle": "web-monitor",
       "action": "skipped",
@@ -736,36 +766,6 @@
     },
     {
       "ts": "2026-10-17T14:06:55.518Z",
-      "cycle": "reminders",
-      "action": "checked",
-      "detail": "0 fired, 0 open"
-    },
-    {
-      "ts": "2026-10-17T14:06:55.518Z",
-      "cycle": "process-inbox",
-      "action": "idle",
-      "detail": "inbox empty"
-    },
-    {
-      "ts": "2026-10-17T14:06:55.517Z",
-      "cycle": "gmail-sync",
-      "action": "skipped",
-      "detail": "Google not configured (GOOGLE_CLIENT_ID/SECRET/REFRESH_TOKEN)"
-    },
-    {
-      "ts": "2026-10-17T14:06:55.515Z",
-      "cycle": "calendar-sync",
-      "action": "synced",
-      "detail": "0 imported from 0 feed(s), 0 Akira-owned"
-    },
-    {
-      "ts": "2026-10-17T14:01:35.938Z",
-      "cycle": "heartbeat",
-      "action": "ok",
-      "detail": "3 ms"
-    },
-    {
-      "ts": "2026-10-17T14:01:35.937Z",
       "cycle": "reminders",
       "action": "checked",
       "detail": "0 fired, 0 open"
