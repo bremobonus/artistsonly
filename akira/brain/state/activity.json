@@ -1,6 +1,36 @@
 {
   "items": [
     {
+      "ts": "2026-10-18T17:44:58.679Z",
+      "cycle": "heartbeat",
+      "action": "ok",
+      "detail": "4 ms"
+    },
+    {
+      "ts": "2026-10-18T17:44:58.679Z",
+      "cycle": "reminders",
+      "action": "checked",
+      "detail": "0 fired, 0 open"
+    },
+    {
+      "ts": "2026-10-18T17:44:58.678Z",
+      "cycle": "process-inbox",
+      "action": "idle",
+      "detail": "inbox empty"
+    },
+    {
+      "ts": "2026-10-18T17:44:58.677Z",
+      "cycle": "gmail-sync",
+      "action": "skipped",
+      "detail": "Google not configured (GOOGLE_CLIENT_ID/SECRET/REFRESH_TOKEN)"
+    },
+    {
+      "ts": "2026-10-18T17:44:58.676Z",
+      "cycle": "calendar-sync",
+      "action": "synced",
+      "detail": "0 imported from 0 feed(s), 0 Akira-owned"
+    },
+    {
       "ts": "2026-10-18T16:04:11.188Z",
       "cycle": "compact-memory",
       "action": "skipped",
@@ -1769,36 +1799,6 @@
       "cycle": "health-review",
       "action": "skipped",
       "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
-    },
-    {
-      "ts": "2026-10-11T16:35:42.867Z",
-      "cycle": "daily-brief",
-      "action": "skipped",
-      "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
-    },
-    {
-      "ts": "2026-10-11T16:35:42.814Z",
-      "cycle": "mail-cleanup",
-      "action": "ok",
-      "detail": "37 ms"
-    },
-    {
-      "ts": "2026-10-11T16:35:42.777Z",
-      "cycle": "mail-cleanup",
-      "action": "skipped",
-      "detail": "CLEANUP_GMAIL_ADDRESS plus CLEANUP_GOOGLE_REFRESH_TOKEN (with a Google OAuth client) or CLEANUP_GMAIL_APP_PASSWORD not set"
-    },
-    {
-      "ts": "2026-10-11T16:35:42.753Z",
-      "cycle": "heartbeat",
-      "action": "ok",
-      "detail": "41 ms"
-    },
-    {
-      "ts": "2026-10-11T16:35:42.733Z",
-      "cycle": "reminders",
-      "action": "checked",
-      "detail": "0 fired, 0 open"
     }
   ]
 }
