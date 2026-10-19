@@ -1,6 +1,12 @@
 {
   "items": [
     {
+      "ts": "2026-10-19T19:13:51.747Z",
+      "cycle": "web-monitor",
+      "action": "skipped",
+      "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
+    },
+    {
       "ts": "2026-10-19T17:23:09.719Z",
       "cycle": "daily-brief",
       "action": "skipped",
@@ -1793,12 +1799,6 @@
       "cycle": "web-monitor",
       "action": "skipped",
       "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
-    },
-    {
-      "ts": "2026-10-13T01:31:05.845Z",
-      "cycle": "heartbeat",
-      "action": "ok",
-      "detail": "3 ms"
     }
   ]
 }
