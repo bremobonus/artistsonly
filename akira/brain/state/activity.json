@@ -1,6 +1,36 @@
 {
   "items": [
     {
+      "ts": "2026-10-31T14:17:30.097Z",
+      "cycle": "heartbeat",
+      "action": "ok",
+      "detail": "4 ms"
+    },
+    {
+      "ts": "2026-10-31T14:17:30.094Z",
+      "cycle": "reminders",
+      "action": "checked",
+      "detail": "0 fired, 0 open"
+    },
+    {
+      "ts": "2026-10-31T14:17:30.094Z",
+      "cycle": "process-inbox",
+      "action": "idle",
+      "detail": "inbox empty"
+    },
+    {
+      "ts": "2026-10-31T14:17:30.093Z",
+      "cycle": "gmail-sync",
+      "action": "skipped",
+      "detail": "Google not configured (GOOGLE_CLIENT_ID/SECRET/REFRESH_TOKEN)"
+    },
+    {
+      "ts": "2026-10-31T14:17:30.092Z",
+      "cycle": "calendar-sync",
+      "action": "synced",
+      "detail": "0 imported from 0 feed(s), 0 Akira-owned"
+    },
+    {
       "ts": "2026-10-31T13:33:09.512Z",
       "cycle": "web-monitor",
       "action": "skipped",
@@ -1769,36 +1799,6 @@
       "cycle": "calendar-sync",
       "action": "synced",
       "detail": "0 imported from 0 feed(s), 0 Akira-owned"
-    },
-    {
-      "ts": "2026-10-24T00:27:48.443Z",
-      "cycle": "web-monitor",
-      "action": "skipped",
-      "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
-    },
-    {
-      "ts": "2026-10-23T22:39:43.496Z",
-      "cycle": "heartbeat",
-      "action": "ok",
-      "detail": "5 ms"
-    },
-    {
-      "ts": "2026-10-23T22:39:43.495Z",
-      "cycle": "reminders",
-      "action": "checked",
-      "detail": "0 fired, 0 open"
-    },
-    {
-      "ts": "2026-10-23T22:39:43.494Z",
-      "cycle": "process-inbox",
-      "action": "idle",
-      "detail": "inbox empty"
-    },
-    {
-      "ts": "2026-10-23T22:39:43.494Z",
-      "cycle": "gmail-sync",
-      "action": "skipped",
-      "detail": "Google not configured (GOOGLE_CLIENT_ID/SECRET/REFRESH_TOKEN)"
     }
   ]
 }
