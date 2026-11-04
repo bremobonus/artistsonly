@@ -1,6 +1,12 @@
 {
   "items": [
     {
+      "ts": "2026-11-04T05:59:58.103Z",
+      "cycle": "web-monitor",
+      "action": "skipped",
+      "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
+    },
+    {
       "ts": "2026-11-04T02:18:53.567Z",
       "cycle": "heartbeat",
       "action": "ok",
@@ -1793,12 +1799,6 @@
       "cycle": "mail-cleanup",
       "action": "skipped",
       "detail": "CLEANUP_GMAIL_ADDRESS plus CLEANUP_GOOGLE_REFRESH_TOKEN (with a Google OAuth client) or CLEANUP_GMAIL_APP_PASSWORD not set"
-    },
-    {
-      "ts": "2026-10-26T17:12:12.641Z",
-      "cycle": "heartbeat",
-      "action": "ok",
-      "detail": "6 ms"
     }
   ]
 }
