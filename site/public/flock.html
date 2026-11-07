@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FLOCK // surveillance grid</title>
+<meta name="description" content="An interactive terminal-styled map of Flock Safety license plate reader cameras across the United States, the 2026 backlash and the leaked device map.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" crossorigin="">
+<style>
+:root{
+  --bg:#020402; --bg2:#051005; --panel:rgba(2,12,4,.86); --line:#0f3d18;
+  --g:#00ff41; --g2:#00b82e; --g3:#0a5c1c; --dim:#4f8a5b; --red:#ff3355; --amber:#ffb000; --cyan:#27e1ff;
+  --mono:"JetBrains Mono","Fira Code","SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--g);font-family:var(--mono);font-size:13px;height:100%}
+a{color:var(--cyan)}
+#rain{position:fixed;inset:0;z-index:0;opacity:.18;pointer-events:none}
+.scan::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)}
+header{position:relative;z-index:2;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;padding:12px 16px;border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:22px;letter-spacing:.12em;text-shadow:0 0 8px var(--g)}
+h1 .cur{animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.sub{color:var(--dim)}
+.kpis{position:relative;z-index:2;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
+.kpi{background:var(--bg);padding:10px 14px}
+.kpi b{display:block;font-size:22px;text-shadow:0 0 6px var(--g2)}
+.kpi span{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.kpi.red b{color:var(--red);text-shadow:0 0 6px var(--red)}
+.kpi.amb b{color:var(--amber);text-shadow:none}
+main{position:relative;z-index:2;display:grid;grid-template-columns:320px 1fr 360px;height:calc(100dvh - 128px);min-height:560px}
+aside,section.term{background:var(--panel);overflow:auto;border-right:1px solid var(--line)}
+section.term{border-right:0;border-left:1px solid var(--line);display:flex;flex-direction:column}
+#map{height:100%;background:#000}
+.leaflet-container{background:#000;font-family:var(--mono)}
+.leaflet-tile-pane{filter:invert(1) grayscale(1) brightness(.55) contrast(1.4) sepia(1) hue-rotate(75deg) saturate(3.5)}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#010a03;color:var(--g);border:1px solid var(--g3);border-radius:2px;box-shadow:0 0 16px rgba(0,255,65,.25)}
+.leaflet-popup-content{font-size:12px;line-height:1.5;margin:10px 12px}
+.leaflet-control-zoom a,.leaflet-control-layers{background:#010a03 !important;color:var(--g) !important;border-color:var(--g3) !important}
+.leaflet-control-layers-expanded{color:var(--g)}
+.leaflet-control-attribution{background:rgba(0,0,0,.7) !important;color:var(--dim) !important}
+.leaflet-control-attribution a{color:var(--dim) !important}
+.pane-h{position:sticky;top:0;background:#010a03;border-bottom:1px solid var(--line);padding:8px 12px;font-size:11px;letter-spacing:.12em;color:var(--dim);display:flex;justify-content:space-between;gap:8px;z-index:1}
+.tabs button{background:none;border:1px solid var(--g3);color:var(--dim);font:inherit;font-size:11px;padding:2px 6px;cursor:pointer}
+.tabs button[aria-pressed=true]{color:#000;background:var(--g)}
+.row{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center;padding:4px 12px;cursor:pointer;border-bottom:1px dashed #08260f}
+.row:hover,.row:focus{background:#062511;outline:none}
+.row .bar{grid-column:2/4;height:3px;background:var(--g3)}
+.row .bar i{display:block;height:100%;background:var(--g);box-shadow:0 0 6px var(--g)}
+.row .n{color:var(--dim)}
+.row.cx .bar i{background:var(--red);box-shadow:0 0 6px var(--red)}
+.cxrow{padding:6px 12px;border-bottom:1px dashed #08260f;cursor:pointer}
+.cxrow:hover{background:#1a0509}
+.cxrow b{color:var(--red)}
+.cxrow small{display:block;color:var(--dim)}
+#log{flex:1;overflow:auto;padding:10px 12px;white-space:pre-wrap;word-break:break-word;line-height:1.5}
+#log .t{color:var(--dim)}
+#log .r{color:var(--red)}
+#log .a{color:var(--amber)}
+#log .c{color:var(--cyan)}
+#log a{color:var(--cyan)}
+form.cmd{display:flex;border-top:1px solid var(--line);background:#010a03}
+form.cmd label{padding:10px 0 10px 12px;color:var(--g)}
+form.cmd input{flex:1;background:none;border:0;color:var(--g);font:inherit;font-size:14px;padding:10px;outline:none;caret-color:var(--g)}
+.chips{display:flex;flex-wrap:wrap;gap:4px;padding:6px 12px;border-top:1px solid var(--line)}
+.chips button{background:none;border:1px solid var(--g3);color:var(--g);font:inherit;font-size:11px;padding:3px 7px;cursor:pointer}
+.chips button:hover{background:var(--g);color:#000}
+.hud{position:absolute;z-index:500;left:10px;bottom:24px;background:rgba(0,8,2,.85);border:1px solid var(--g3);padding:6px 9px;font-size:11px;color:var(--dim);pointer-events:none}
+.hud b{color:var(--g)}
+.mapwrap{position:relative;height:100%;overflow:hidden}
+#globe{position:absolute;inset:0;z-index:400;background:radial-gradient(ellipse at 50% 45%,#03210c 0%,#010602 55%,#000 100%)}
+#globe canvas{outline:none}
+.mapwrap.street #globe{display:none}
+.mapwrap.globe #map,.mapwrap.globe .hud,.mapwrap.globe .wall{visibility:hidden}
+.modes{position:absolute;z-index:600;left:10px;top:10px;display:flex;border:1px solid var(--g3);background:rgba(0,8,2,.85)}
+.modes button{background:none;border:0;color:var(--dim);font:inherit;font-size:11px;letter-spacing:.12em;padding:6px 10px;cursor:pointer}
+.modes button[aria-pressed=true]{background:var(--g);color:#000}
+.target{position:absolute;z-index:600;left:10px;top:48px;width:min(300px,calc(100% - 20px));background:rgba(0,8,2,.88);border:1px solid var(--g3);padding:10px 12px;font-size:12px;line-height:1.6;display:none}
+.target.on{display:block}
+.target h3{margin:0 0 4px;font-size:15px;letter-spacing:.06em;text-shadow:0 0 6px var(--g2)}
+.target .meter{height:4px;background:var(--g3);margin:6px 0}
+.target .meter i{display:block;height:100%;background:var(--g);box-shadow:0 0 8px var(--g)}
+.target button{margin-top:8px;width:100%;background:var(--g);color:#000;border:0;font:inherit;font-weight:700;letter-spacing:.1em;padding:7px;cursor:pointer}
+.target button:hover{box-shadow:0 0 14px var(--g)}
+.target .x{position:absolute;right:6px;top:2px;width:auto;margin:0;background:none;color:var(--dim);padding:2px 6px}
+.leaflet-tooltip.ltip{background:none;border:0;box-shadow:none;padding:0}
+.leaflet-tooltip.ltip::before{display:none}
+.gtip{font-family:var(--mono);font-size:12px;background:rgba(0,8,2,.92);border:1px solid var(--g);color:var(--g);padding:6px 9px;line-height:1.5}
+.gtip b{font-size:13px}
+.gtip .r{color:#ff3355}
+.wall{position:absolute;z-index:500;left:0;right:0;bottom:0;display:none;gap:6px;overflow-x:auto;padding:8px 10px;background:linear-gradient(0deg,rgba(0,6,2,.95),rgba(0,6,2,.75));border-top:1px solid var(--g3)}
+.mapwrap.has-wall .wall{display:flex}
+.mapwrap.has-wall.street .hud,.mapwrap.has-wall.street .legend{bottom:96px}
+.tile{flex:0 0 150px;height:64px;border:1px solid var(--g3);background:#010a03;padding:5px 7px;font-size:10px;line-height:1.45;cursor:pointer;position:relative;overflow:hidden;text-align:left;color:var(--g);font-family:var(--mono)}
+.tile:hover,.tile:focus{border-color:var(--g);box-shadow:0 0 10px rgba(0,255,65,.4);outline:none}
+.tile b{display:block;font-size:11px}
+.tile span{color:var(--dim)}
+.tile::after{content:"";position:absolute;right:6px;top:6px;width:6px;height:6px;border-radius:50%;background:#ff3355;animation:pulse 2s infinite}
+.search{display:flex;margin-left:auto;border:1px solid var(--g3);background:#010a03}
+.search input{background:none;border:0;color:var(--g);font:inherit;padding:6px 8px;width:220px;outline:none}
+.search button{background:none;border:0;border-left:1px solid var(--g3);color:var(--g);font:inherit;padding:0 10px;cursor:pointer}
+@media (max-width:700px){.search{margin-left:0;width:100%}.search input{flex:1;width:auto}}
+.legend{position:absolute;z-index:500;right:10px;bottom:24px;background:rgba(0,8,2,.85);border:1px solid var(--g3);padding:6px 9px;font-size:11px;line-height:1.7}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.cam-ico{width:10px;height:10px;border-radius:50%;background:var(--g);box-shadow:0 0 8px 2px var(--g);border:1px solid #bfffcf}
+.cx-ico{width:12px;height:12px;background:var(--red);box-shadow:0 0 10px 2px var(--red);transform:rotate(45deg)}
+.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,51,85,.7)}70%{box-shadow:0 0 0 12px rgba(255,51,85,0)}100%{box-shadow:0 0 0 0 rgba(255,51,85,0)}}
+.fov{fill:var(--g);}
+footer{position:relative;z-index:2;padding:6px 16px;color:var(--dim);font-size:11px;border-top:1px solid var(--line)}
+@media (max-width:1100px){
+  main{grid-template-columns:1fr;height:auto}
+  .mapwrap{height:62dvh;order:-1}
+  aside{max-height:320px;border-right:0;border-top:1px solid var(--line)}
+  section.term{height:420px;border-left:0;border-top:1px solid var(--line)}
+}
+@media (max-width:600px){.kpi:last-child{grid-column:1/-1}.hud{display:none}.legend{display:none}}
+@media (prefers-reduced-motion:reduce){#rain{display:none}h1 .cur,.pulse{animation:none}}
+</style>
+</head>
+<body class="scan">
+<canvas id="rain" aria-hidden="true"></canvas>
+
+<header>
+  <h1>&gt; FLOCK://GRID<span class="cur">_</span></h1>
+  <span class="sub">license plate readers · united states · the 2026 backlash</span>
+  <span class="sub" id="clock"></span>
+  <form class="search" id="search" role="search"><input id="q" placeholder="search a city, county, address…" aria-label="Search a place"><button aria-label="Search">⌕</button></form>
+</header>
+
+<div class="kpis" role="list">
+  <div class="kpi" role="listitem"><b data-count="142944">0</b><span>ALPRs mapped by volunteers (DeFlock)</span></div>
+  <div class="kpi amb" role="listitem"><b data-count="335701">0</b><span>device locations in leaked Flock data</span></div>
+  <div class="kpi" role="listitem"><b data-count="120000" data-suffix="+">0</b><span>cameras Flock says it runs, 49 states</span></div>
+  <div class="kpi red" role="listitem"><b data-count="200" data-suffix="+">0</b><span>cities &amp; counties dropped ALPR contracts in 2026</span></div>
+  <div class="kpi red" role="listitem"><b data-count="4000" data-suffix="+">0</b><span>lookups run for federal immigration asks (404 Media)</span></div>
+</div>
+
+<main>
+  <aside aria-label="Index">
+    <div class="pane-h"><span id="idx-title">STATES // MAPPED CAMERAS</span>
+      <span class="tabs"><button id="tab-states" aria-pressed="true">states</button> <button id="tab-cx" aria-pressed="false">exits</button></span></div>
+    <div id="idx"></div>
+  </aside>
+
+  <div class="mapwrap globe" id="mapwrap">
+    <div id="map" role="application" aria-label="Street-level map of Flock cameras"></div>
+    <div id="globe" role="application" aria-label="Globe of US states shaded by camera count"></div>
+    <div class="modes" role="group" aria-label="View"><button id="m-globe" aria-pressed="true">◉ GLOBE</button><button id="m-street" aria-pressed="false">▦ STREET</button></div>
+    <div class="target" id="target" aria-live="polite"></div>
+    <div class="wall" id="wall" aria-label="Camera wall: nodes loaded in this view"></div>
+    <div class="hud" id="hud">lat <b>--</b> lon <b>--</b> z <b>--</b></div>
+    <div class="legend">
+      <div><span class="dot" style="background:#00ff41;box-shadow:0 0 6px #00ff41;border-radius:0"></span>state shaded by mapped cameras</div>
+      <div><span class="dot" style="background:#bfffcf;box-shadow:0 0 6px #00ff41"></span>camera (live OpenStreetMap, zoom ≥ 11)</div>
+      <div><span class="dot" style="background:#ff3355"></span>contract cancelled / paused</div>
+    </div>
+  </div>
+
+  <section class="term" aria-label="Terminal">
+    <div class="pane-h"><span>TERMINAL // flock@grid</span><span id="net">idle</span></div>
+    <div id="log" aria-live="polite"></div>
+    <div class="chips">
+      <button data-c="globe">globe</button><button data-c="news">news</button><button data-c="scan">scan view</button><button data-c="near">near me</button>
+      <button data-c="goto Atlanta">goto Atlanta</button><button data-c="top 10">top 10</button><button data-c="exits">exits</button><button data-c="help">help</button>
+    </div>
+    <form class="cmd" id="cmd" autocomplete="off"><label for="in">$</label><input id="in" placeholder="type help" spellcheck="false" aria-label="Command"></form>
+  </section>
+</main>
+
+<footer>
+  Counts are from public reporting and volunteer mapping, not from Flock; they differ by source and date (see <code>sources</code>). Live camera points come from OpenStreetMap
+  (<code>surveillance:type=ALPR</code>) via the Overpass API. Last compiled 2026-09-29.
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/globe.gl@2.46.2/dist/globe.gl.min.js" crossorigin=""></script>
+<script>
+"use strict";
+/* ============================== data ============================== */
+// DeFlock "Flock & ALPR Cameras by State", as of 2026-09-28. [name, abbr, count, lat, lon]
+const STATES = [
+["California","CA",20741,37.2,-119.5],["Texas","TX",17074,31.2,-99.3],["Georgia","GA",10008,32.7,-83.4],
+["Florida","FL",9647,28.4,-81.7],["Illinois","IL",8041,40.0,-89.2],["Ohio","OH",6834,40.3,-82.8],
+["New York","NY",4416,42.9,-75.5],["Pennsylvania","PA",3761,40.9,-77.8],["North Carolina","NC",3731,35.5,-79.4],
+["Indiana","IN",3704,39.9,-86.3],["Michigan","MI",3670,43.3,-84.6],["Tennessee","TN",3631,35.8,-86.4],
+["Missouri","MO",3437,38.4,-92.5],["Virginia","VA",3419,37.5,-78.8],["Alabama","AL",2864,32.8,-86.8],
+["Colorado","CO",2705,39.0,-105.5],["Arizona","AZ",2699,34.3,-111.7],["New Jersey","NJ",2322,40.1,-74.7],
+["Washington","WA",2291,47.4,-120.5],["South Carolina","SC",2108,33.9,-80.9],["Louisiana","LA",2105,31.0,-92.0],
+["Wisconsin","WI",2097,44.6,-89.9],["Kansas","KS",2058,38.5,-98.4],["Kentucky","KY",1919,37.5,-85.3],
+["Minnesota","MN",1612,46.3,-94.3],["Oklahoma","OK",1486,35.6,-97.5],["Massachusetts","MA",1191,42.3,-71.8],
+["Mississippi","MS",1139,32.7,-89.7],["Arkansas","AR",1076,34.9,-92.4],["Utah","UT",1067,39.3,-111.7],
+["New Mexico","NM",1039,34.4,-106.1],["Connecticut","CT",1011,41.6,-72.7],["Maryland","MD",990,39.0,-76.8],
+["Nevada","NV",959,39.3,-116.6],["Iowa","IA",907,42.1,-93.5],["Nebraska","NE",594,41.5,-99.8],
+["Oregon","OR",547,43.9,-120.6],["Idaho","ID",463,44.4,-114.6],["Delaware","DE",458,39.0,-75.5],
+["North Dakota","ND",350,47.5,-100.5],["Rhode Island","RI",314,41.7,-71.5],["West Virginia","WV",247,38.6,-80.6],
+["Puerto Rico","PR",204,18.2,-66.5],["South Dakota","SD",161,44.4,-100.2],["District of Columbia","DC",154,38.9,-77.03],
+["Montana","MT",87,47.0,-109.6],["Wyoming","WY",72,43.0,-107.5],["New Hampshire","NH",68,43.7,-71.6],
+["Maine","ME",64,45.4,-69.2],["Hawaii","HI",56,20.8,-156.3],["Vermont","VT",34,44.1,-72.7],["Alaska","AK",5,61.4,-150.0]
+];
+const TOTAL = 142944;
+
+// Contract exits reported in the news / trackers. [place, state, date, action, reason, lat, lon, source]
+const EXITS = [
+["Manitowoc","WI","2026-09-25","non-renewal","budget shift away from citywide camera systems",44.09,-87.66,"findingflock"],
+["Plymouth","MN","2026-09-22","cancelled","data privacy concerns, eroding public trust",45.01,-93.46,"findingflock"],
+["Monroe","OH","2026-09-22","non-renewal","community opposition over potential data misuse",39.44,-84.36,"findingflock"],
+["Hutto","TX","2026-09-17","cancelled","council rejected plate-reader technology",30.54,-97.55,"findingflock"],
+["El Paso","TX","2026-09-15","non-renewal","governor blocked state grant funding",31.76,-106.49,"findingflock"],
+["Plano","TX","2026-09-14","deactivated","state funding freeze",33.02,-96.70,"findingflock"],
+["Tallahassee","FL","2026-09-09","paused","state ban on roadway plate readers",30.44,-84.28,"findingflock"],
+["Manvel","TX","2026-09-08","cancelled","\"different policy and budget choice\"",29.46,-95.36,"findingflock"],
+["Bastrop","TX","2026-09-08","cancelled","privacy concerns; cameras already vandalized",30.11,-97.32,"findingflock"],
+["Lynchburg","VA","2026-09-03","non-renewal","agreement ends when contract expires, April 2027",37.41,-79.14,"findingflock"],
+["Magnolia","TX","2026","ended","listed by Houston Chronicle",30.21,-95.75,"chron"],
+["Pflugerville","TX","2026","ended","listed by Houston Chronicle",30.44,-97.62,"chron"],
+["Hays County","TX","2026","ended","county contract ended",30.06,-98.03,"chron"],
+["Hood County","TX","2026","ended","county contract ended",32.43,-97.83,"chron"],
+["Kendall County","TX","2026","ended","county contract ended",29.94,-98.71,"chron"],
+["Santa Cruz","CA","2026","terminated","resident organizing",36.97,-122.03,"davis"],
+["Mountain View","CA","2026","terminated","resident organizing",37.39,-122.08,"davis"],
+["El Cerrito","CA","2026","terminated","resident organizing",37.92,-122.31,"davis"],
+["Los Angeles (LAPD)","CA","2026","cancelled","LAPD found 32.3% false-positive rate on stolen-vehicle alerts",34.05,-118.24,"northeastern"],
+["Framingham","MA","2026-06-25","non-renewal","police announced non-renewal",42.28,-71.42,"northeastern"],
+["Austin","TX","2025","cancelled","organizers ended the city's ALPR contract",30.27,-97.74,"eff"],
+["Cambridge","MA","2026","deactivated","cameras found installed after a deactivation order",42.37,-71.11,"findingflock"]
+];
+
+const NEWS = [
+["2025-11-13","a","Researcher Joshua Michael tells Flock its servers leak an access token without login; he reports it three times.","intercept"],
+["2026-01","t","Flock blog: \"Flock has never been hacked, and there has not been a leak.\"","intercept"],
+["2026-06-25","t","Framingham, MA police announce they will not renew Flock.","northeastern"],
+["2026-07","r","LAPD finds a 32.3% false-positive rate on stolen-vehicle alerts.","findingflock"],
+["2026-08","r","93 cities and counties end Flock contracts in one month, over three a day. Flock offers staff buyouts.","thehill"],
+["2026-08-31","r","Florida DOT bans plate readers from state roads at the governor's request; 30 days to remove. ~98% of ALPRs sit on local roads and private land and are not covered.","nbc"],
+["2026-08-31","t","Flock cuts default retention from 30 days to 7 days after the backlash.","northeastern"],
+["2026-09-02","a","Texas State Sen. Lois Kolkhorst calls for a statewide ALPR ban: \"Get the Flock out of Texas.\"","kbtx"],
+["2026-09-04","t","Texas DPS keeps its network; at least 940 DPS cameras, per an email a lawmaker shared.","texastribune"],
+["2026-09","a","ACLU's Chad Marlow testifies to a Senate Judiciary subcommittee on ALPR abuse.","aclu"],
+["2026-09-17","a","Daily Caller reports a Flock patent describing tracking beyond plate reading.","dailycaller"],
+["2026-09-24","r","The Intercept: leaked Flock data maps 170,000+ cameras and 130,000+ other devices, incl. 27,000 acoustic sensors and 860 devices around Chicago O'Hare. Flock files a trademark complaint to get the map taken down.","intercept"],
+["2026-09-28","t","DeFlock volunteers have mapped 142,944 ALPRs; California leads with 20,741.","deflock"]
+];
+
+const SRC = {
+  intercept:["The Intercept, 2026-09-24","https://theintercept.com/2026/09/24/how-many-flock-devices-in-united-states-300000/"],
+  toms:["Tom's Hardware","https://www.tomshardware.com/tech-industry/cyber-security/flock-seeks-to-have-security-researchers-map-of-flock-cameras-taken-down-unauthenticated-flaw-exposed-335-701-camera-locations-nationwide"],
+  northeastern:["Northeastern Global News, 2026-08-31","https://news.northeastern.edu/2026/08/31/flock-camera-controversy/"],
+  findingflock:["Finding Flock cancellation tracker","https://www.findingflock.com/learn/flock-contract-cancellations"],
+  thehill:["The Hill","https://thehill.com/policy/technology/6053849-flock-contract-cancellations-grow-data-concerns/"],
+  nbc:["NBC News","https://www.nbcnews.com/tech/tech-news/florida-bans-flock-license-plate-readers-state-highways-rcna595420"],
+  kbtx:["KBTX, 2026-09-02","https://www.kbtx.com/2026/09/02/get-flock-out-texas-state-senator-calls-alpr-ban/"],
+  texastribune:["Texas Tribune, 2026-09-04","https://www.texastribune.org/2026/09/04/texas-flock-cameras-dps-network-search-abbott/"],
+  aclu:["ACLU","https://www.aclu.org/news/privacy-technology/tracking-alpr-cameras/despite-new-updates-flocks-creepy-cameras-remain-major-civil-liberties-threat"],
+  dailycaller:["Daily Caller, 2026-09-17","https://dailycaller.com/2026/09/17/flock-safety-patent-spying-technology-cameras-facial-recognition-movements-tracking/"],
+  deflock:["DeFlock The USA, by state","https://deflocktheusa.com/flock-cameras/"],
+  chron:["Houston Chronicle map","https://www.houstonchronicle.com/projects/2026/flock-camera-votes-map/"],
+  davis:["Davis Vanguard","https://davisvanguard.org/2026/09/california-cities-cancel-flock-contracts/"],
+  eff:["EFF via Harvard TagTeam","https://tagteam.harvard.edu/hub_feeds/2036/feed_items/14025923"],
+  ice:["Immigration Policy Tracking Project (404 Media)","https://immpolicytracking.org/policies/reported-ice-accessing-flock-automated-license-plate-reader-cameras-via-local-law-enforcement/"],
+  osm:["DeFlock / OpenStreetMap","https://maps.deflock.org/"]
+};
+
+/* ============================== matrix rain ============================== */
+(() => {
+  const c = document.getElementById("rain"), x = c.getContext("2d");
+  const glyphs = "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉ0123456789ABCDEFALPRFLOCK#$%&*";
+  let cols = [], fs = 14;
+  const size = () => { c.width = innerWidth; c.height = innerHeight; cols = Array(Math.ceil(c.width / fs)).fill(0).map(() => Math.random() * c.height / fs); };
+  size(); addEventListener("resize", size);
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  setInterval(() => {
+    x.fillStyle = "rgba(2,4,2,.08)"; x.fillRect(0, 0, c.width, c.height);
+    x.fillStyle = "#00ff41"; x.font = fs + "px monospace";
+    cols.forEach((y, i) => {
+      x.fillText(glyphs[(Math.random() * glyphs.length) | 0], i * fs, y * fs);
+      cols[i] = y * fs > c.height && Math.random() > .975 ? 0 : y + 1;
+    });
+  }, 55);
+})();
+
+/* ============================== helpers ============================== */
+const $ = s => document.querySelector(s);
+const fmt = n => n.toLocaleString("en-US");
+const esc = s => String(s).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
+const logEl = $("#log");
+const queue = []; let typing = false;
+function print(html, cls = "", instant = false) {
+  queue.push({ html, cls, instant }); if (!typing) drain();
+}
+function drain() {
+  const job = queue.shift(); if (!job) { typing = false; return; }
+  typing = true;
+  const line = document.createElement("div"); if (job.cls) line.className = job.cls; logEl.appendChild(line);
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (job.instant || reduced || job.html.includes("<")) { line.innerHTML = job.html; logEl.scrollTop = logEl.scrollHeight; setTimeout(drain, 10); return; }
+  let i = 0; const t = job.html;
+  const step = () => { i += 3; line.textContent = t.slice(0, i); logEl.scrollTop = logEl.scrollHeight; i < t.length ? setTimeout(step, 8) : drain(); };
+  step();
+}
+function srcLink(k) { const s = SRC[k]; return s ? `<a href="${s[1]}" target="_blank" rel="noopener">[${esc(s[0])}]</a>` : ""; }
+setInterval(() => { $("#clock").textContent = new Date().toISOString().replace("T", " ").slice(0, 19) + "Z"; }, 1000);
+
+// count-up KPIs
+document.querySelectorAll("[data-count]").forEach(el => {
+  const end = +el.dataset.count, suf = el.dataset.suffix || ""; let t0 = null;
+  const f = ts => { t0 ??= ts; const p = Math.min(1, (ts - t0) / 1600); el.textContent = fmt(Math.round(end * (1 - Math.pow(1 - p, 3)))) + (p === 1 ? suf : ""); if (p < 1) requestAnimationFrame(f); };
+  requestAnimationFrame(f);
+});
+
+/* ============================== map ============================== */
+const map = L.map("map", { zoomControl: false, worldCopyJump: true, preferCanvas: true }).setView([38.5, -96], 4);
+L.control.zoom({ position: "topright" }).addTo(map);
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 19,
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · cameras: <a href="https://deflock.org">DeFlock</a>/OSM'
+}).addTo(map);
+
+const stateLayer = L.layerGroup().addTo(map);
+const exitLayer = L.layerGroup().addTo(map);
+const camLayer = L.layerGroup().addTo(map);
+L.control.layers(null, { "state density": stateLayer, "contract exits": exitLayer, "live cameras (OSM)": camLayer }, { collapsed: true, position: "topright" }).addTo(map);
+
+const maxC = STATES[0][2];
+const byName = Object.fromEntries(STATES.map(s => [s[0], s]));
+const byAb = Object.fromEntries(STATES.map(s => [s[1], s]));
+const rankOf = ab => STATES.findIndex(s => s[1] === ab) + 1;
+const heat = n => Math.sqrt(n / maxC);            // 0..1, sqrt so small states stay visible
+function stateTip(st) {
+  const ex = EXITS.filter(e => e[1] === st[1]);
+  return `<b>${esc(st[0])}</b> [${st[1]}]<br>${fmt(st[2])} mapped ALPRs · rank #${rankOf(st[1])}<br>${(100 * st[2] / TOTAL).toFixed(1)}% of US total` +
+    (ex.length ? `<br><span class="r">✕ ${ex.length} contract exit${ex.length > 1 ? "s" : ""}: ${ex.map(e => esc(e[0])).join(", ")}</span>` : "");
+}
+// US state shapes (us-atlas, Census cartographic boundaries) shared by the globe and the street map.
+let STATE_SHAPES = [];
+const stateLayers = {};
+const shapesReady = fetch("https://cdn.jsdelivr.net/npm/us-atlas@3.0.1/states-10m.json")
+  .then(r => r.json())
+  .then(topo => {
+    STATE_SHAPES = topojson.feature(topo, topo.objects.states).features
+      .map(f => { f.st = byName[f.properties.name]; return f; })
+      .filter(f => f.st);
+    L.geoJSON({ type: "FeatureCollection", features: STATE_SHAPES }, {
+      style: f => ({ color: "#00ff41", weight: 1, opacity: .7, fillColor: "#00ff41", fillOpacity: .04 + .5 * heat(f.st[2]) }),
+      onEachFeature: (f, layer) => {
+        stateLayers[f.st[1]] = layer;
+        layer.bindTooltip(`<div class="gtip">${stateTip(f.st)}</div>`, { sticky: true, opacity: 1, className: "ltip" });
+        layer.on("mouseover", () => layer.setStyle({ weight: 2.5, fillOpacity: .15 + .6 * heat(f.st[2]) }));
+        layer.on("mouseout", () => layer.setStyle({ weight: 1, fillOpacity: .04 + .5 * heat(f.st[2]) }));
+        layer.on("click", () => { map.fitBounds(layer.getBounds(), { maxZoom: 8 }); print(`&gt; ${esc(f.st[0])}: ${fmt(f.st[2])} mapped cameras, rank #${rankOf(f.st[1])}/${STATES.length}`, "", true); });
+      }
+    }).addTo(stateLayer);
+    return STATE_SHAPES;
+  })
+  .catch(() => { print("! state shapes unreachable; showing state markers instead", "a"); return []; });
+
+const cxIcon = L.divIcon({ className: "", html: '<div class="cx-ico pulse"></div>', iconSize: [12, 12] });
+EXITS.forEach(([p, st, d, a, why, lat, lon, s]) => {
+  L.marker([lat, lon], { icon: cxIcon, title: p })
+    .bindPopup(`<b style="color:#ff3355">${esc(p)}, ${st}</b><br>${esc(a.toUpperCase())} · ${esc(d)}<br>${esc(why)}<br>${srcLink(s)}`)
+    .addTo(exitLayer);
+});
+
+map.on("mousemove", e => { $("#hud").innerHTML = `lat <b>${e.latlng.lat.toFixed(4)}</b> lon <b>${e.latlng.lng.toFixed(4)}</b> z <b>${map.getZoom()}</b> cams <b>${camCount}</b>`; });
+
+/* ---------- live cameras from OpenStreetMap (Overpass) ---------- */
+const OVERPASS = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://maps.mail.ru/osm/tools/overpass/api/interpreter"];
+const seen = new Set(); let camCount = 0, busy = false, auto = true;
+const camMarkers = new Map(); const wallItems = [];
+function addToWall(el) {
+  const tg = el.tags || {};
+  wallItems.unshift(el); if (wallItems.length > 24) wallItems.pop();
+  const wall = $("#wall");
+  wall.innerHTML = wallItems.map(e => {
+    const t = e.tags || {}, dir = t["camera:direction"] || t.direction;
+    return `<button class="tile" data-id="${e.id}"><b>NODE ${e.id}</b>${esc(t.manufacturer || t.brand || "ALPR")}${t.operator ? " · " + esc(t.operator) : ""}<br><span>${e.lat.toFixed(4)}, ${e.lon.toFixed(4)}${dir ? " · " + esc(dir) + "°" : ""}</span></button>`;
+  }).join("");
+  $("#mapwrap").classList.add("has-wall");
+}
+$("#wall").addEventListener("click", e => {
+  const t = e.target.closest(".tile"); if (!t) return;
+  const m = camMarkers.get(+t.dataset.id); if (!m) return;
+  map.setView(m.getLatLng(), Math.max(map.getZoom(), 16)); m.openPopup();
+});
+const camIcon = L.divIcon({ className: "", html: '<div class="cam-ico"></div>', iconSize: [10, 10] });
+
+function fovWedge(lat, lon, deg) {
+  const pts = [[lat, lon]], R = 0.0009;
+  for (let a = deg - 30; a <= deg + 30; a += 10) {
+    const r = a * Math.PI / 180;
+    pts.push([lat + R * Math.cos(r), lon + R * Math.sin(r) / Math.cos(lat * Math.PI / 180)]);
+  }
+  return L.polygon(pts, { color: "#00ff41", weight: 0, fillOpacity: .18, interactive: false });
+}
+
+async function scan(manual) {
+  if (busy) return;
+  if (map.getZoom() < 10) { if (manual) print("! zoom in to city level (z ≥ 10) before scanning. try: goto <city>", "a"); return; }
+  const b = map.getBounds();
+  const bbox = [b.getSouth(), b.getWest(), b.getNorth(), b.getEast()].map(v => v.toFixed(4)).join(",");
+  const q = `[out:json][timeout:25];(node["surveillance:type"="ALPR"](${bbox}););out body 2000;`;
+  busy = true; $("#net").textContent = "overpass: querying…";
+  if (manual) print(`$ overpass --bbox ${bbox} --tag surveillance:type=ALPR`, "t", true);
+  let data = null;
+  for (const url of OVERPASS) {
+    try {
+      const r = await fetch(url, { method: "POST", body: "data=" + encodeURIComponent(q), headers: { "Content-Type": "application/x-www-form-urlencoded" } });
+      if (r.ok) { data = await r.json(); break; }
+    } catch (_) { /* try next mirror */ }
+  }
+  busy = false;
+  if (!data) { $("#net").textContent = "overpass: offline"; print("! overpass mirrors unreachable. retry in a moment.", "r"); return; }
+  let added = 0, flock = 0;
+  for (const el of data.elements) {
+    const tg = el.tags || {};
+    if (/flock/i.test((tg.manufacturer || "") + (tg.brand || "") + (tg.operator || ""))) flock++;
+    if (seen.has(el.id)) continue; seen.add(el.id); added++; camCount++;
+    const dir = parseFloat(tg["camera:direction"] || tg.direction);
+    if (!isNaN(dir)) fovWedge(el.lat, el.lon, dir).addTo(camLayer);
+    const rows = Object.entries(tg).map(([k, v]) => `<span style="color:#4f8a5b">${esc(k)}</span>=${esc(v)}`).join("<br>");
+    const mk = L.marker([el.lat, el.lon], { icon: camIcon });
+    camMarkers.set(el.id, mk); addToWall(el);
+    mk.bindPopup(`<b>ALPR node/${el.id}</b><br>${el.lat.toFixed(5)}, ${el.lon.toFixed(5)}<br>${rows}<br><a href="https://www.openstreetmap.org/node/${el.id}" target="_blank" rel="noopener">view on OSM ↗</a>`)
+      .addTo(camLayer);
+  }
+  $("#net").textContent = `overpass: ${data.elements.length} in view`;
+  print(`+ ${data.elements.length} ALPRs in view (${flock} tagged Flock), ${added} new. total on grid: ${camCount}`, data.elements.length ? "" : "a", true);
+}
+let t; map.on("moveend", () => { clearTimeout(t); if (auto && map.getZoom() >= 11) t = setTimeout(() => scan(false), 600); });
+
+/* ============================== side index ============================== */
+function showStates(list = STATES) {
+  $("#idx-title").textContent = "STATES // MAPPED CAMERAS";
+  $("#idx").innerHTML = list.map(([name, ab, n], i) => `
+    <div class="row" tabindex="0" data-ab="${ab}">
+      <span class="n">${String(STATES.findIndex(s => s[1] === ab) + 1).padStart(2, "0")}</span><span>${esc(name)}</span><span>${fmt(n)}</span>
+      <div class="bar"><i style="width:${(100 * n / maxC).toFixed(1)}%"></i></div>
+    </div>`).join("");
+}
+function showExits() {
+  $("#idx-title").textContent = `CONTRACT EXITS // ${EXITS.length} PLOTTED`;
+  $("#idx").innerHTML = EXITS.map(([p, st, d, a, why], i) => `
+    <div class="cxrow" tabindex="0" data-i="${i}"><b>${esc(p)}, ${st}</b> · ${esc(a)}<small>${esc(d)} — ${esc(why)}</small></div>`).join("");
+}
+$("#idx").addEventListener("click", e => {
+  const r = e.target.closest("[data-ab],[data-i]"); if (!r) return;
+  if (r.dataset.ab) { focusState(r.dataset.ab); }
+  else { const x = EXITS[+r.dataset.i]; if (mode === "globe") flyGlobe(x[5], x[6], .35); else map.flyTo([x[5], x[6]], 12); print(`&gt; ${esc(x[0])}, ${x[1]}: ${esc(x[3])} (${esc(x[2])}). ${esc(x[4])} ${srcLink(x[7])}`, "r", true); }
+});
+$("#idx").addEventListener("keydown", e => { if (e.key === "Enter") e.target.click(); });
+$("#tab-states").onclick = () => { $("#tab-states").setAttribute("aria-pressed", "true"); $("#tab-cx").setAttribute("aria-pressed", "false"); showStates(); };
+$("#tab-cx").onclick = () => { $("#tab-cx").setAttribute("aria-pressed", "true"); $("#tab-states").setAttribute("aria-pressed", "false"); showExits(); };
+showStates();
+
+/* ============================== globe ============================== */
+let mode = "globe", G = null, hoverF = null, selAb = null;
+const wrap = $("#mapwrap");
+function setMode(m) {
+  if (m === mode) return;
+  mode = m;
+  wrap.classList.toggle("globe", m === "globe"); wrap.classList.toggle("street", m === "street");
+  $("#m-globe").setAttribute("aria-pressed", m === "globe"); $("#m-street").setAttribute("aria-pressed", m === "street");
+  $("#target").classList.toggle("on", m === "globe" && !!selAb);
+  if (m === "street") setTimeout(() => map.invalidateSize(), 30);
+  else if (G) G.width(wrap.clientWidth).height(wrap.clientHeight);
+}
+$("#m-globe").onclick = () => setMode("globe");
+$("#m-street").onclick = () => setMode("street");
+function flyGlobe(lat, lng, alt = .55) { if (G) { G.controls().autoRotate = false; G.pointOfView({ lat, lng, altitude: alt }, 1400); } }
+const gAlt = f => .006 + .11 * heat(f.st[2]);
+const gCap = f => { const h = heat(f.st[2]); return `rgba(0,${Math.round(90 + 165 * h)},${Math.round(40 + 25 * h)},${(.28 + .6 * h).toFixed(2)})`; };
+function paintGlobe() {
+  if (!G) return;
+  G.polygonAltitude(f => f.st[1] === selAb ? gAlt(f) + .05 : f === hoverF ? gAlt(f) + .025 : gAlt(f))
+   .polygonCapColor(f => f.st[1] === selAb ? "rgba(190,255,205,.95)" : f === hoverF ? "rgba(0,255,65,.92)" : gCap(f));
+}
+function focusState(ab, quiet) {
+  const st = byAb[ab]; if (!st) return;
+  selAb = ab;
+  if (mode === "globe") { flyGlobe(st[3], st[4], ["DC", "RI", "DE", "CT", "NJ"].includes(ab) ? .35 : ["TX", "CA", "AK", "MT"].includes(ab) ? 1.05 : .7); paintGlobe(); }
+  else if (stateLayers[ab]) map.fitBounds(stateLayers[ab].getBounds(), { maxZoom: 8 });
+  else map.flyTo([st[3], st[4]], 6);
+  const ex = EXITS.filter(e => e[1] === ab);
+  $("#target").innerHTML = `<button class="x" aria-label="Close">✕</button><h3>◎ ${esc(st[0].toUpperCase())} [${ab}]</h3>
+    ${fmt(st[2])} mapped ALPRs · rank #${rankOf(ab)}/${STATES.length}<div class="meter"><i style="width:${(100 * st[2] / maxC).toFixed(1)}%"></i></div>
+    ${(100 * st[2] / TOTAL).toFixed(2)}% of the US total` +
+    (ex.length ? `<br><span style="color:#ff3355">✕ exits: ${ex.map(e => esc(e[0])).join(", ")}</span>` : "") +
+    `<button class="dive">DIVE ▸ STREET LEVEL</button>`;
+  $("#target").classList.toggle("on", mode === "globe");
+  $("#target .x").onclick = () => { $("#target").classList.remove("on"); selAb = null; paintGlobe(); };
+  $("#target .dive").onclick = () => { $("#target").classList.remove("on"); setMode("street"); setTimeout(() => focusState(ab, true), 60); print(`▦ diving into ${esc(st[0])}: zoom to a city and live camera nodes load`, "c", true); };
+  if (!quiet) print(`&gt; target ${esc(st[0])}: ${fmt(st[2])} mapped cameras, rank #${rankOf(ab)}/${STATES.length}`, "", true);
+}
+(async () => {
+  const el = $("#globe");
+  try {
+    if (typeof Globe !== "function") throw new Error("globe.gl missing");
+    G = Globe()(el)
+      .width(wrap.clientWidth).height(wrap.clientHeight)
+      .backgroundColor("rgba(0,0,0,0)")
+      .globeImageUrl("https://cdn.jsdelivr.net/npm/three-globe@2.45.3/example/img/earth-dark.jpg")
+      .bumpImageUrl("https://cdn.jsdelivr.net/npm/three-globe@2.45.3/example/img/earth-topology.png")
+      .showAtmosphere(true).atmosphereColor("#00ff41").atmosphereAltitude(.16)
+      .pointOfView({ lat: 37, lng: -97, altitude: 1.9 })
+      .polygonSideColor(() => "rgba(0,255,65,.18)")
+      .polygonStrokeColor(() => "#00ff41")
+      .polygonLabel(f => `<div class="gtip">${stateTip(f.st)}<br><span style="color:#4f8a5b">click to target</span></div>`)
+      .onPolygonHover(f => { hoverF = f; el.style.cursor = f ? "pointer" : "grab"; paintGlobe(); })
+      .onPolygonClick(f => focusState(f.st[1]))
+      .polygonsTransitionDuration(300)
+      .pointsData(EXITS.map(e => ({ e })))
+      .pointLat(d => d.e[5]).pointLng(d => d.e[6]).pointColor(() => "#ff3355").pointAltitude(.02).pointRadius(.22)
+      .pointLabel(d => `<div class="gtip"><b class="r">${esc(d.e[0])}, ${d.e[1]}</b><br>${esc(d.e[3])} · ${esc(d.e[2])}<br>${esc(d.e[4])}</div>`)
+      .onPointClick(d => { focusState(d.e[1], true); print(`&gt; ${esc(d.e[0])}, ${d.e[1]}: ${esc(d.e[3])} (${esc(d.e[2])}). ${esc(d.e[4])} ${srcLink(d.e[7])}`, "r", true); })
+      .ringsData(EXITS.map(e => ({ lat: e[5], lng: e[6] })))
+      .ringColor(() => t => `rgba(255,51,85,${(1 - t).toFixed(2)})`).ringMaxRadius(1.6).ringPropagationSpeed(1.2).ringRepeatPeriod(1600)
+      .labelsData(STATES.slice(0, 8)).labelLat(s => s[3]).labelLng(s => s[4]).labelText(s => `${s[1]} ${fmt(s[2])}`)
+      .labelSize(.9).labelDotRadius(.3).labelColor(() => "rgba(200,255,210,.9)").labelResolution(2).labelAltitude(.13);
+    const c = G.controls(); c.autoRotate = true; c.autoRotateSpeed = .35;
+    c.addEventListener("start", () => { c.autoRotate = false; });
+    new ResizeObserver(() => { if (mode === "globe") G.width(wrap.clientWidth).height(wrap.clientHeight); }).observe(wrap);
+    const shapes = await shapesReady;
+    G.polygonsData(shapes); paintGlobe();
+  } catch (err) {
+    print("! 3D globe needs WebGL; switching to the street map", "a");
+    mode = "globe"; setMode("street");
+  }
+})();
+$("#search").addEventListener("submit", e => { e.preventDefault(); const v = $("#q").value.trim(); if (v) run("goto " + v); });
+
+/* ============================== terminal ============================== */
+async function geocode(q) {
+  const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us,pr&q=${encodeURIComponent(q)}`);
+  const j = await r.json(); return j[0];
+}
+const CMDS = {
+  help() {
+    print([
+      "commands:",
+      "  news              timeline of the 2026 Flock story",
+      "  top [n]           states ranked by mapped cameras",
+      "  state <name|XX>   stats for one state and fly there",
+      "  globe | street    switch between the 3D globe and the street map",
+      "  goto <place>      fly to a city / address (OSM geocoder)",
+      "  scan              pull live ALPR points for the current view",
+      "  near              locate you and scan around you",
+      "  exits             cities that cancelled / paused contracts",
+      "  leak              what the leaked Flock device map showed",
+      "  ice               federal immigration lookups",
+      "  auto on|off       auto-scan when zoomed in (now: " + (auto ? "on" : "off") + ")",
+      "  sources           every source used",
+      "  clear             clear the terminal"
+    ].join("\n"), "c");
+  },
+  news() { NEWS.forEach(([d, c, s, k]) => print(`[${d}] ${esc(s)} ${srcLink(k)}`, c === "r" ? "r" : c === "a" ? "a" : "", true)); },
+  top(n) {
+    n = Math.max(1, Math.min(52, parseInt(n) || 10));
+    STATES.slice(0, n).forEach(([name, ab, c], i) => {
+      const bar = "█".repeat(Math.max(1, Math.round(28 * c / maxC)));
+      print(`${String(i + 1).padStart(2)} ${ab} ${bar} ${fmt(c)}`, "", true);
+    });
+  },
+  state(...a) {
+    const q = a.join(" ").toLowerCase(); if (!q) return print("usage: state <name|XX>", "a");
+    const s = STATES.find(s => s[1].toLowerCase() === q || s[0].toLowerCase() === q) || STATES.find(s => s[0].toLowerCase().startsWith(q));
+    if (!s) return print(`! no state matching "${esc(q)}"`, "r");
+    const ex = EXITS.filter(e => e[1] === s[1]);
+    print(`${esc(s[0])} [${s[1]}] · ${fmt(s[2])} mapped ALPRs · ${(100 * s[2] / TOTAL).toFixed(2)}% of US · rank #${STATES.indexOf(s) + 1}` + (ex.length ? `\n  exits plotted: ${ex.map(e => esc(e[0])).join(", ")}` : ""), "", true);
+    focusState(s[1], true);
+  },
+  async goto(...a) {
+    const q = a.join(" "); if (!q) return print("usage: goto <place>", "a");
+    print(`$ geocode "${esc(q)}"`, "t", true);
+    setMode("street");
+    try {
+      const g = await geocode(q); if (!g) return print("! not found", "r");
+      print(`→ ${esc(g.display_name)}`, "", true);
+      const bb = g.boundingbox.map(Number);
+      map.flyToBounds([[bb[0], bb[2]], [bb[1], bb[3]]], { maxZoom: 13 });
+      map.once("moveend", () => { if (map.getZoom() < 11) map.setZoom(11); });
+    } catch { print("! geocoder unreachable", "r"); }
+  },
+  scan() { setMode("street"); return scan(true); },
+  globe() { setMode("globe"); print("◉ globe view: drag to spin, click a state, then DIVE to street level", "c", true); },
+  street() { setMode("street"); print("▦ street view: zoom into a city to load live camera nodes", "c", true); },
+  near() {
+    if (!navigator.geolocation) return print("! geolocation not available", "r");
+    print("$ locate --self (your position stays in this browser)", "t", true);
+    setMode("street");
+    navigator.geolocation.getCurrentPosition(p => { map.setView([p.coords.latitude, p.coords.longitude], 13); setTimeout(() => scan(true), 700); },
+      () => print("! location permission denied", "r"));
+  },
+  exits() {
+    $("#tab-cx").click();
+    print(`${EXITS.length} exits plotted in red. Trackers count 200+ city/county exits in 2026, 93 in August alone.`, "r", true);
+    EXITS.slice(0, 10).forEach(e => print(`  ✕ ${esc(e[0])}, ${e[1]} · ${esc(e[3])} · ${esc(e[2])}`, "r", true));
+    print("  … click a row in the left panel to fly there", "t", true);
+  },
+  leak() {
+    print([
+      "LEAK // reported by The Intercept, 2026-09-24",
+      "  2025-11  researcher Joshua Michael finds a Flock server handing out an access token with no login",
+      "           that token queried Flock's ArcGIS layer of device locations",
+      "  2025-11-13  first of three notices to Flock",
+      "  2026-01  Flock: \"Flock has never been hacked, and there has not been a leak\"",
+      "  result   170,000+ cameras + 130,000+ other devices ≈ 300,000 (Tom's Hardware counts 335,701)",
+      "           incl. 27,000 acoustic (gunshot) sensors, 860 devices around Chicago O'Hare",
+      "  2026-09  Flock files a trademark complaint to take the map down"
+    ].join("\n"), "a");
+    print(`${srcLink("intercept")} ${srcLink("toms")}`, "", true);
+  },
+  ice() {
+    print("ICE has no Flock contract. Per 404 Media's review, local and state police ran 4,000+ Flock searches at federal immigration request. Illinois and California audits documented federal access contrary to state law.", "r", true);
+    print(`${srcLink("ice")} ${srcLink("findingflock")}`, "", true);
+  },
+  auto(v) { auto = v !== "off"; print(`auto-scan ${auto ? "on" : "off"}`, "", true); },
+  sources() { Object.keys(SRC).forEach(k => print(`  ${srcLink(k)}`, "", true)); },
+  clear() { logEl.innerHTML = ""; }
+};
+const hist = []; let hi = 0;
+async function run(line) {
+  line = line.trim(); if (!line) return;
+  hist.push(line); hi = hist.length;
+  print(`flock@grid:~$ ${esc(line)}`, "c", true);
+  const [c, ...a] = line.split(/\s+/);
+  const f = CMDS[c.toLowerCase()];
+  if (f) await f(...a); else print(`command not found: ${esc(c)} · type help`, "r", true);
+}
+$("#cmd").addEventListener("submit", e => { e.preventDefault(); const v = $("#in").value; $("#in").value = ""; run(v); });
+$("#in").addEventListener("keydown", e => {
+  if (e.key === "ArrowUp" && hi > 0) { $("#in").value = hist[--hi]; e.preventDefault(); }
+  if (e.key === "ArrowDown") { hi = Math.min(hist.length, hi + 1); $("#in").value = hist[hi] || ""; e.preventDefault(); }
+});
+document.querySelectorAll(".chips button").forEach(b => b.onclick = () => run(b.dataset.c));
+
+// boot
+[
+  "FLOCK://GRID v1.0 · booting…",
+  "loading 52 state tallies (DeFlock, 2026-09-28) …… ok",
+  `loading ${EXITS.length} contract exits …… ok`,
+  "linking overpass-api.de (OpenStreetMap) …… ready",
+  "",
+  "Flock Safety sells cameras that photograph every passing car and log its plate into a searchable network.",
+  "In 2026 the backlash went national: a leaked map of ~300k devices, a Florida highway ban, and 200+ cities walking away.",
+  ""
+].forEach((l, i) => print(l, i < 4 ? "t" : ""));
+print("drag the <b>globe</b>, click a state, then <b>DIVE ▸ STREET LEVEL</b>. Or type <b>help</b>, or search a city above.", "c");
+</script>
+</body>
+</html>

@@ -14,6 +14,8 @@ is artistsonly.io with the hidden operations room at `/akira`. Read `README.md` 
 - **Show work as an interactive HTML page.** Every report, status update or set of decisions for Amos is
   published as an HTML5 artifact he can interact with and respond on (Artifact tool), not only as chat text.
   His responses on the page are read back and journaled.
+- **Always show the link.** Every reply that produces or changes something ends with its links: the live URL
+  (e.g. `https://artistsonly.io/flock`), the published artifact URL, and the PR. Never make Amos ask for one.
 - Akira never asks Amos; she decides within her powers and logs it (`akira/brain/rules/autonomy.md`). Drafts to third parties still go out only through channels Amos has wired up.
 
 ## Working here
