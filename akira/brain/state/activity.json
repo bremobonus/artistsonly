@@ -1,6 +1,12 @@
 {
   "items": [
     {
+      "ts": "2026-11-12T02:49:17.725Z",
+      "cycle": "web-monitor",
+      "action": "skipped",
+      "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
+    },
+    {
       "ts": "2026-11-11T23:16:36.268Z",
       "cycle": "heartbeat",
       "action": "ok",
@@ -1793,12 +1799,6 @@
       "cycle": "gmail-sync",
       "action": "skipped",
       "detail": "Google not configured (GOOGLE_CLIENT_ID/SECRET/REFRESH_TOKEN)"
-    },
-    {
-      "ts": "2026-11-02T19:04:44.003Z",
-      "cycle": "calendar-sync",
-      "action": "synced",
-      "detail": "0 imported from 0 feed(s), 0 Akira-owned"
     }
   ]
 }
