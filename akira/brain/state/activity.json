@@ -1,6 +1,18 @@
 {
   "items": [
     {
+      "ts": "2026-11-15T19:01:53.900Z",
+      "cycle": "compact-memory",
+      "action": "skipped",
+      "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
+    },
+    {
+      "ts": "2026-11-15T19:01:53.898Z",
+      "cycle": "health-review",
+      "action": "skipped",
+      "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
+    },
+    {
       "ts": "2026-11-15T17:37:31.430Z",
       "cycle": "daily-brief",
       "action": "skipped",
@@ -1787,18 +1799,6 @@
       "cycle": "heartbeat",
       "action": "ok",
       "detail": "3 ms"
-    },
-    {
-      "ts": "2026-11-06T12:40:55.152Z",
-      "cycle": "reminders",
-      "action": "checked",
-      "detail": "0 fired, 0 open"
-    },
-    {
-      "ts": "2026-11-06T12:40:55.151Z",
-      "cycle": "process-inbox",
-      "action": "idle",
-      "detail": "inbox empty"
     }
   ]
 }
