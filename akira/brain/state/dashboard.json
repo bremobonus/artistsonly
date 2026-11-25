@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-24T23:52:48.696Z",
+  "generatedAt": "2026-11-25T02:13:56.183Z",
   "assistant": {
     "name": "Akira",
     "email": "akira@artistsonly.io",
@@ -12,10 +12,10 @@
   },
   "now": {
     "lastCycle": {
-      "ts": "2026-11-24T23:52:48.695Z",
-      "cycle": "heartbeat",
-      "action": "ok",
-      "detail": "4 ms"
+      "ts": "2026-11-25T02:13:56.181Z",
+      "cycle": "web-monitor",
+      "action": "skipped",
+      "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
     },
     "nextCycles": [
       {
@@ -411,6 +411,12 @@
   ],
   "activity": [
     {
+      "ts": "2026-11-25T02:13:56.181Z",
+      "cycle": "web-monitor",
+      "action": "skipped",
+      "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
+    },
+    {
       "ts": "2026-11-24T23:52:48.695Z",
       "cycle": "heartbeat",
       "action": "ok",
@@ -761,12 +767,6 @@
     {
       "ts": "2026-11-22T18:25:12.948Z",
       "cycle": "web-monitor",
-      "action": "skipped",
-      "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
-    },
-    {
-      "ts": "2026-11-22T18:21:27.757Z",
-      "cycle": "daily-brief",
       "action": "skipped",
       "detail": "ANTHROPIC_API_KEY is not set in GitHub Actions secrets; add it to enable this cycle"
     }
